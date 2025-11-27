@@ -27,7 +27,7 @@ class CtaSection extends StatelessWidget {
           Icon(
             Icons.rocket_launch,
             size: 48,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
           ),
           const SizedBox(height: 16),
           Text(
@@ -42,7 +42,7 @@ class CtaSection extends StatelessWidget {
           Text(
             'Take the first step towards a successful career in commerce',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
             textAlign: TextAlign.center,
           ),

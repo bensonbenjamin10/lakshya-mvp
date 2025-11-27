@@ -32,8 +32,8 @@ class CourseCard extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                      Theme.of(context).colorScheme.secondary.withOpacity(0.6),
+                      Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+                      Theme.of(context).colorScheme.secondary.withValues(alpha: 0.6),
                     ],
                   ),
                 ),
@@ -43,7 +43,7 @@ class CourseCard extends StatelessWidget {
                       child: Icon(
                         _getCourseIcon(course.category),
                         size: 56,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                     if (course.isPopular)
@@ -87,7 +87,7 @@ class CourseCard extends StatelessWidget {
                           color: Theme.of(context)
                               .colorScheme
                               .primary
-                              .withOpacity(0.1),
+                              .withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
