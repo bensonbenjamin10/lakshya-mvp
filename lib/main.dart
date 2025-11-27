@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:lakshya_mvp/providers/lead_provider.dart';
 import 'package:lakshya_mvp/providers/course_provider.dart';
 import 'package:lakshya_mvp/routes/app_router.dart';
-import 'package:lakshya_mvp/theme/app_theme.dart';
+import 'package:lakshya_mvp/theme/theme.dart';
 
 void main() {
   runApp(const LakshyaApp());
@@ -22,8 +22,20 @@ class LakshyaApp extends StatelessWidget {
       child: MaterialApp.router(
         title: 'Lakshya Institute',
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
+        theme: AppTheme.lightTheme.copyWith(
+          extensions: [
+            StatusColors.light,
+            BrandAccents.light,
+            CourseColors.light,
+          ],
+        ),
+        darkTheme: AppTheme.darkTheme.copyWith(
+          extensions: [
+            StatusColors.dark,
+            BrandAccents.dark,
+            CourseColors.dark,
+          ],
+        ),
         themeMode: ThemeMode.light,
         routerConfig: AppRouter.router,
       ),
