@@ -6,9 +6,12 @@ class CtaSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(64),
+      padding: EdgeInsets.all(isMobile ? 32 : 48),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -21,33 +24,52 @@ class CtaSection extends StatelessWidget {
       ),
       child: Column(
         children: [
+          Icon(
+            Icons.rocket_launch,
+            size: 48,
+            color: Colors.white.withOpacity(0.9),
+          ),
+          const SizedBox(height: 16),
           Text(
             'Ready to Start Your Journey?',
-            style: Theme.of(context).textTheme.displayMedium?.copyWith(
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text(
             'Take the first step towards a successful career in commerce',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.white70,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.white.withOpacity(0.9),
                 ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: () => context.go('/contact'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Theme.of(context).colorScheme.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 20),
-            ),
-            child: const Text(
-              'Get Started Today',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: isMobile ? double.infinity : null,
+            child: ElevatedButton(
+              onPressed: () => context.go('/contact'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Theme.of(context).colorScheme.primary,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 32 : 40,
+                  vertical: 16,
+                ),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Get Started Today',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(width: 8),
+                  Icon(Icons.arrow_forward, size: 18),
+                ],
+              ),
             ),
           ),
         ],
@@ -55,4 +77,3 @@ class CtaSection extends StatelessWidget {
     );
   }
 }
-

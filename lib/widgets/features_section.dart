@@ -5,93 +5,115 @@ class FeaturesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+
     final features = [
       {
         'icon': Icons.public,
         'title': 'Global Recognition',
-        'description': 'Internationally recognized qualifications that open doors worldwide',
+        'description': 'Internationally recognized qualifications',
       },
       {
         'icon': Icons.school,
         'title': 'Expert Faculty',
-        'description': 'Learn from industry experts and experienced professionals',
+        'description': 'Learn from industry professionals',
       },
       {
         'icon': Icons.work,
         'title': 'Career Support',
-        'description': 'Comprehensive placement assistance and career guidance',
+        'description': 'Placement assistance & guidance',
       },
       {
         'icon': Icons.schedule,
         'title': 'Flexible Learning',
-        'description': 'Study at your own pace with online and offline options',
+        'description': 'Online and offline options',
       },
       {
         'icon': Icons.people,
         'title': 'Strong Network',
-        'description': 'Join a community of successful professionals',
+        'description': 'Community of professionals',
       },
       {
         'icon': Icons.verified,
         'title': 'Certified Programs',
-        'description': 'Accredited courses with industry-standard certifications',
+        'description': 'Industry-standard certifications',
       },
     ];
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       color: Colors.grey[50],
       child: Column(
         children: [
           Text(
             'Why Choose Lakshya?',
-            style: Theme.of(context).textTheme.displaySmall,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             'Your pathway to professional excellence',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[600],
                 ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 24),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1.1,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: isMobile ? 2 : 3,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: isMobile ? 1.0 : 1.2,
             ),
             itemCount: features.length,
             itemBuilder: (context, index) {
               final feature = features[index];
               return Card(
+                elevation: 1,
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        feature['icon'] as IconData,
-                        size: 48,
-                        color: Theme.of(context).colorScheme.primary,
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          feature['icon'] as IconData,
+                          size: isMobile ? 28 : 36,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
                       Text(
                         feature['title'] as String,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                         textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
                       Text(
                         feature['description'] as String,
-                        style: Theme.of(context).textTheme.bodySmall,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.grey[600],
+                            ),
                         textAlign: TextAlign.center,
-                        maxLines: 3,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -105,4 +127,3 @@ class FeaturesSection extends StatelessWidget {
     );
   }
 }
-

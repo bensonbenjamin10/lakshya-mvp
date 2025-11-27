@@ -169,7 +169,7 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<LeadSource>(
-                  value: _selectedSource,
+                  initialValue: _selectedSource,
                   decoration: const InputDecoration(
                     labelText: 'How did you hear about us?',
                   ),
