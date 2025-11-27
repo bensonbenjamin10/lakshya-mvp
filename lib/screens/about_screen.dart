@@ -58,7 +58,7 @@ class AboutScreen extends StatelessWidget {
                   Text(
                     'Excellence in Commerce Education',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
                   ),
                 ],
@@ -71,7 +71,7 @@ class AboutScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Mission
-                  _SectionCard(
+                  const _SectionCard(
                     icon: Icons.flag,
                     title: 'Our Mission',
                     content:
@@ -80,7 +80,7 @@ class AboutScreen extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Vision
-                  _SectionCard(
+                  const _SectionCard(
                     icon: Icons.visibility,
                     title: 'Our Vision',
                     content:
@@ -96,22 +96,22 @@ class AboutScreen extends StatelessWidget {
                         ),
                   ),
                   const SizedBox(height: 12),
-                  _ProgramItem(
+                  const _ProgramItem(
                     icon: Icons.account_balance,
                     title: 'ACCA',
                     description: 'Association of Chartered Certified Accountants',
                   ),
-                  _ProgramItem(
+                  const _ProgramItem(
                     icon: Icons.balance,
                     title: 'CA',
                     description: 'Chartered Accountancy - Premier qualification',
                   ),
-                  _ProgramItem(
+                  const _ProgramItem(
                     icon: Icons.analytics,
                     title: 'CMA (US)',
                     description: 'Certified Management Accountant',
                   ),
-                  _ProgramItem(
+                  const _ProgramItem(
                     icon: Icons.business_center,
                     title: 'B.Com & MBA',
                     description: 'Integrated dual degree program',
@@ -127,22 +127,22 @@ class AboutScreen extends StatelessWidget {
                         ),
                   ),
                   const SizedBox(height: 12),
-                  _FeatureItem(
+                  const _FeatureItem(
                     icon: Icons.star,
                     title: 'Excellence',
                     description: 'Proven track record of student success',
                   ),
-                  _FeatureItem(
+                  const _FeatureItem(
                     icon: Icons.people,
                     title: 'Expert Faculty',
                     description: 'Learn from industry professionals',
                   ),
-                  _FeatureItem(
+                  const _FeatureItem(
                     icon: Icons.public,
                     title: 'Global Reach',
                     description: 'Students from across the world',
                   ),
-                  _FeatureItem(
+                  const _FeatureItem(
                     icon: Icons.work,
                     title: 'Career Support',
                     description: 'Placement assistance & guidance',
@@ -206,7 +206,7 @@ class _SectionCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -304,7 +304,7 @@ class _FeatureItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
+              color: Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
