@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lakshya_mvp/screens/splash_screen.dart';
 import 'package:lakshya_mvp/screens/home_screen.dart';
 import 'package:lakshya_mvp/screens/courses_screen.dart';
 import 'package:lakshya_mvp/screens/course_detail_screen.dart';
@@ -14,8 +15,14 @@ class AppRouter {
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/',
+    initialLocation: '/splash',
     routes: [
+      // Splash Screen
+      GoRoute(
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       // Main shell with bottom navigation
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -64,14 +71,18 @@ class AppRouter {
           ),
         ],
       ),
-      // Course detail - outside shell (full screen)
+      // Course detail - outside shell (full screen with swipe-back support)
       GoRoute(
         path: '/course/:id',
         name: 'course-detail',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final courseId = state.pathParameters['id']!;
-          return CourseDetailScreen(courseId: courseId);
+          // Use MaterialPage for proper swipe-back gesture support
+          return MaterialPage(
+            key: state.pageKey,
+            child: CourseDetailScreen(courseId: courseId),
+          );
         },
       ),
     ],

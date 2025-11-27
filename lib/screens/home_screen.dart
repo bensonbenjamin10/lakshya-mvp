@@ -7,6 +7,7 @@ import 'package:lakshya_mvp/widgets/hero_section.dart';
 import 'package:lakshya_mvp/widgets/features_section.dart';
 import 'package:lakshya_mvp/widgets/testimonials_section.dart';
 import 'package:lakshya_mvp/widgets/cta_section.dart';
+import 'package:lakshya_mvp/widgets/video_promo_section.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -82,35 +83,51 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Popular Courses',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: AppSpacing.xs),
-                            Text(
-                              'Start your journey with our top programs',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color: AppColors.neutral500,
-                                  ),
-                            ),
-                          ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Popular Courses',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              const SizedBox(height: AppSpacing.xs),
+                              Text(
+                                'Start your journey with our top programs',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: AppColors.neutral500,
+                                    ),
+                              ),
+                            ],
+                          ),
                         ),
-                        TextButton.icon(
+                        const SizedBox(width: AppSpacing.sm),
+                        TextButton(
                           onPressed: () => context.go('/courses'),
-                          icon: const Icon(Icons.arrow_forward, size: 18),
-                          label: const Text('View All'),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('View All'),
+                              SizedBox(width: AppSpacing.xs),
+                              Icon(Icons.arrow_forward, size: 16),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -133,7 +150,7 @@ class HomeScreen extends StatelessWidget {
                                 courseProvider
                                     .selectCourse(popularCourses[index]);
                                 context
-                                    .go('/course/${popularCourses[index].id}');
+                                    .push('/course/${popularCourses[index].id}');
                               },
                             ),
                           );
@@ -144,7 +161,12 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
+              // Video Promo Section
+              const SizedBox(height: AppSpacing.xxl),
+              const VideoPromoSection(),
+
               // Features Section
+              const SizedBox(height: AppSpacing.xxl),
               const FeaturesSection(),
 
               // Testimonials Section

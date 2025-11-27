@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lakshya_mvp/theme/theme.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -18,160 +19,236 @@ class AboutScreen extends StatelessWidget {
             // Header
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.secondary,
-                  ],
-                ),
+              padding: const EdgeInsets.all(AppSpacing.xxl),
+              decoration: const BoxDecoration(
+                gradient: AppColors.heroGradient,
               ),
               child: Column(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(AppSpacing.lg),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: AppSpacing.borderRadiusMd,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
-                    child: Text(
+                    child: const Text(
                       'L',
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: AppColors.classicBlue,
                         fontWeight: FontWeight.bold,
                         fontSize: 40,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
                   Text(
                     'Lakshya Institute',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Excellence in Commerce Education',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.9),
-                        ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.sm,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: AppSpacing.borderRadiusFull,
+                    ),
+                    child: Text(
+                      'Excellence in Commerce Education',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
                   ),
                 ],
               ),
             ),
 
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(AppSpacing.screenPadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Mission
+                  // Mission & Vision
                   const _SectionCard(
-                    icon: Icons.flag,
+                    icon: Icons.flag_rounded,
+                    iconColor: AppColors.classicBlue,
                     title: 'Our Mission',
                     content:
                         'Lakshya Institute is dedicated to delivering excellence in commerce professional courses globally. We empower students with world-class qualifications and skills that drive successful careers.',
                   ),
-                  const SizedBox(height: 16),
-
-                  // Vision
+                  const SizedBox(height: AppSpacing.lg),
                   const _SectionCard(
-                    icon: Icons.visibility,
+                    icon: Icons.visibility_rounded,
+                    iconColor: AppColors.ultramarine,
                     title: 'Our Vision',
                     content:
                         'To be the leading institute for commerce education, creating globally competent professionals who excel in their chosen fields and contribute to the growth of organizations worldwide.',
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xxxl),
 
                   // Programs
-                  Text(
-                    'Our Programs',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(AppSpacing.sm),
+                        decoration: BoxDecoration(
+                          color: AppColors.mimosaGold20,
+                          borderRadius: AppSpacing.borderRadiusSm,
                         ),
+                        child: const Icon(
+                          Icons.school_rounded,
+                          color: AppColors.mimosaGold,
+                          size: AppSpacing.iconSm,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Text(
+                        'Our Programs',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.lg),
                   const _ProgramItem(
-                    icon: Icons.account_balance,
+                    icon: Icons.account_balance_rounded,
+                    color: AppColors.classicBlue,
                     title: 'ACCA',
                     description: 'Association of Chartered Certified Accountants',
                   ),
                   const _ProgramItem(
-                    icon: Icons.balance,
+                    icon: Icons.balance_rounded,
+                    color: AppColors.ultramarine,
                     title: 'CA',
                     description: 'Chartered Accountancy - Premier qualification',
                   ),
                   const _ProgramItem(
-                    icon: Icons.analytics,
+                    icon: Icons.analytics_rounded,
+                    color: AppColors.success,
                     title: 'CMA (US)',
                     description: 'Certified Management Accountant',
                   ),
                   const _ProgramItem(
-                    icon: Icons.business_center,
+                    icon: Icons.business_center_rounded,
+                    color: AppColors.mimosaGold,
                     title: 'B.Com & MBA',
                     description: 'Integrated dual degree program',
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xxxl),
 
                   // Why Choose Us
-                  Text(
-                    'Why Choose Us',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(AppSpacing.sm),
+                        decoration: BoxDecoration(
+                          color: AppColors.successLight,
+                          borderRadius: AppSpacing.borderRadiusSm,
                         ),
+                        child: const Icon(
+                          Icons.verified_rounded,
+                          color: AppColors.success,
+                          size: AppSpacing.iconSm,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Text(
+                        'Why Choose Us',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.lg),
                   const _FeatureItem(
-                    icon: Icons.star,
+                    icon: Icons.star_rounded,
                     title: 'Excellence',
                     description: 'Proven track record of student success',
                   ),
                   const _FeatureItem(
-                    icon: Icons.people,
+                    icon: Icons.people_rounded,
                     title: 'Expert Faculty',
                     description: 'Learn from industry professionals',
                   ),
                   const _FeatureItem(
-                    icon: Icons.public,
+                    icon: Icons.public_rounded,
                     title: 'Global Reach',
                     description: 'Students from across the world',
                   ),
                   const _FeatureItem(
-                    icon: Icons.work,
+                    icon: Icons.work_rounded,
                     title: 'Career Support',
                     description: 'Placement assistance & guidance',
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.xxxl),
 
                   // CTA
-                  SizedBox(
+                  Container(
                     width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => context.go('/contact'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: const Text('Get in Touch'),
+                    padding: const EdgeInsets.all(AppSpacing.xxl),
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryGradient,
+                      borderRadius: AppSpacing.borderRadiusLg,
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Ready to Start?',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          'Take the first step towards your career',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.9),
+                              ),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        SizedBox(
+                          width: double.infinity,
+                          height: AppSpacing.buttonHeightLg,
+                          child: ElevatedButton(
+                            onPressed: () => context.go('/contact'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: AppColors.classicBlue,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: AppSpacing.borderRadiusSm,
+                              ),
+                            ),
+                            child: const Text(
+                              'Get in Touch',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: () => context.go('/courses'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: const Text('Explore Courses'),
-                    ),
-                  ),
+
+                  // Bottom padding
+                  const SizedBox(height: AppSpacing.xxl),
                 ],
               ),
             ),
@@ -184,11 +261,13 @@ class AboutScreen extends StatelessWidget {
 
 class _SectionCard extends StatelessWidget {
   final IconData icon;
+  final Color iconColor;
   final String title;
   final String content;
 
   const _SectionCard({
     required this.icon,
+    required this.iconColor,
     required this.title,
     required this.content,
   });
@@ -196,25 +275,31 @@ class _SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppSpacing.borderRadiusMd,
+        side: BorderSide(color: AppColors.neutral200),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    color: iconColor.withValues(alpha: 0.1),
+                    borderRadius: AppSpacing.borderRadiusSm,
                   ),
                   child: Icon(
                     icon,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: iconColor,
+                    size: AppSpacing.iconMd,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -223,12 +308,12 @@ class _SectionCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Text(
               content,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[700],
-                    height: 1.5,
+                    color: AppColors.neutral600,
+                    height: 1.6,
                   ),
             ),
           ],
@@ -240,11 +325,13 @@ class _SectionCard extends StatelessWidget {
 
 class _ProgramItem extends StatelessWidget {
   final IconData icon;
+  final Color color;
   final String title;
   final String description;
 
   const _ProgramItem({
     required this.icon,
+    required this.color,
     required this.title,
     required this.description,
   });
@@ -252,32 +339,45 @@ class _ProgramItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      shape: RoundedRectangleBorder(
+        borderRadius: AppSpacing.borderRadiusMd,
+        side: BorderSide(color: AppColors.neutral200),
+      ),
       child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
         leading: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Theme.of(context).colorScheme.primary,
-                Theme.of(context).colorScheme.secondary,
-              ],
+              colors: [color, color.withValues(alpha: 0.7)],
             ),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: AppSpacing.borderRadiusSm,
           ),
-          child: Icon(icon, color: Colors.white, size: 20),
+          child: Icon(icon, color: Colors.white, size: AppSpacing.iconSm),
         ),
         title: Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
         ),
-        subtitle: Text(description),
+        subtitle: Text(
+          description,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.neutral500,
+              ),
+        ),
         trailing: Icon(
-          Icons.arrow_forward_ios,
+          Icons.arrow_forward_ios_rounded,
           size: 16,
-          color: Theme.of(context).colorScheme.primary,
+          color: color,
         ),
       ),
     );
@@ -298,22 +398,22 @@ class _FeatureItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+              color: AppColors.successLight,
+              borderRadius: AppSpacing.borderRadiusSm,
             ),
             child: Icon(
               icon,
-              color: Colors.green,
-              size: 20,
+              color: AppColors.success,
+              size: AppSpacing.iconSm,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,7 +427,7 @@ class _FeatureItem extends StatelessWidget {
                 Text(
                   description,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.neutral500,
                       ),
                 ),
               ],
