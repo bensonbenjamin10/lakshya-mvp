@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:lakshya_mvp/providers/course_provider.dart';
 import 'package:lakshya_mvp/models/course.dart';
+import 'package:lakshya_mvp/theme/theme.dart';
 
 class CoursesScreen extends StatefulWidget {
   const CoursesScreen({super.key});
@@ -33,9 +34,9 @@ class _CoursesScreenState extends State<CoursesScreen> {
           // Header
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppSpacing.screenPadding),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+              color: AppColors.classicBlue10,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,11 +47,11 @@ class _CoursesScreenState extends State<CoursesScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   'Choose from our range of globally recognized programs',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.neutral500,
                       ),
                 ),
               ],
@@ -60,7 +61,10 @@ class _CoursesScreenState extends State<CoursesScreen> {
           // Category Filter
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
             child: Row(
               children: [
                 _CategoryChip(
@@ -72,10 +76,10 @@ class _CoursesScreenState extends State<CoursesScreen> {
                     });
                   },
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 ...CourseCategory.values.map((category) {
                   return Padding(
-                    padding: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.only(right: AppSpacing.sm),
                     child: _CategoryChip(
                       label: _getCategoryLabel(category),
                       isSelected: _selectedCategory == category,
@@ -100,19 +104,21 @@ class _CoursesScreenState extends State<CoursesScreen> {
                       children: [
                         Icon(
                           Icons.school_outlined,
-                          size: 64,
-                          color: Colors.grey[400],
+                          size: AppSpacing.iconHuge,
+                          color: AppColors.neutral300,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.lg),
                         Text(
                           'No courses found',
-                          style: TextStyle(color: Colors.grey[600]),
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: AppColors.neutral500,
+                              ),
                         ),
                       ],
                     ),
                   )
                 : ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(AppSpacing.lg),
                     itemCount: filteredCourses.length,
                     itemBuilder: (context, index) {
                       final course = filteredCourses[index];
@@ -160,28 +166,26 @@ class _CategoryChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
         decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
+          color: isSelected ? AppColors.classicBlue : Colors.transparent,
+          borderRadius: AppSpacing.borderRadiusFull,
           border: Border.all(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Colors.grey[400]!,
+            color: isSelected ? AppColors.classicBlue : AppColors.neutral300,
             width: 1.5,
           ),
         ),
         child: Text(
           label,
-          style: TextStyle(
-            color: isSelected
-                ? Colors.white
-                : Theme.of(context).colorScheme.primary,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          ),
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: isSelected ? Colors.white : AppColors.classicBlue,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              ),
         ),
       ),
     );
@@ -200,35 +204,28 @@ class _CourseListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Row(
             children: [
               Container(
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Theme.of(context).colorScheme.primary,
-                      Theme.of(context).colorScheme.secondary,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: AppSpacing.borderRadiusMd,
                 ),
                 child: Icon(
                   _getCourseIcon(course.category),
                   color: Colors.white,
-                  size: 28,
+                  size: AppSpacing.iconLg,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.lg),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,10 +236,8 @@ class _CourseListItem extends StatelessWidget {
                           child: Text(
                             course.categoryName,
                             style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary,
+                                Theme.of(context).textTheme.labelSmall?.copyWith(
+                                      color: AppColors.classicBlue,
                                       fontWeight: FontWeight.bold,
                                     ),
                           ),
@@ -250,25 +245,27 @@ class _CourseListItem extends StatelessWidget {
                         if (course.isPopular)
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.amber,
-                              borderRadius: BorderRadius.circular(10),
+                              color: AppColors.mimosaGold,
+                              borderRadius: AppSpacing.borderRadiusFull,
                             ),
-                            child: const Text(
+                            child: Text(
                               'Popular',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.neutral900,
+                                  ),
                             ),
                           ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       course.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -277,43 +274,45 @@ class _CourseListItem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Row(
                       children: [
                         Icon(
                           Icons.access_time,
                           size: 14,
-                          color: Colors.grey[600],
+                          color: AppColors.neutral500,
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: AppSpacing.xs),
                         Text(
                           course.duration,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey[600],
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.neutral500,
+                                  ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: AppSpacing.lg),
                         Icon(
                           Icons.trending_up,
                           size: 14,
-                          color: Colors.grey[600],
+                          color: AppColors.neutral500,
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: AppSpacing.xs),
                         Text(
                           course.level,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey[600],
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.neutral500,
+                                  ),
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Icon(
                 Icons.chevron_right,
-                color: Theme.of(context).colorScheme.primary,
+                color: AppColors.classicBlue,
               ),
             ],
           ),

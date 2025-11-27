@@ -7,6 +7,7 @@ import 'package:lakshya_mvp/widgets/hero_section.dart';
 import 'package:lakshya_mvp/widgets/features_section.dart';
 import 'package:lakshya_mvp/widgets/testimonials_section.dart';
 import 'package:lakshya_mvp/widgets/cta_section.dart';
+import 'package:lakshya_mvp/theme/theme.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -15,8 +16,6 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final courseProvider = Provider.of<CourseProvider>(context);
     final popularCourses = courseProvider.getPopularCourses();
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 600;
 
     return Scaffold(
       appBar: AppBar(
@@ -25,58 +24,46 @@ class HomeScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: BorderRadius.circular(8),
+                gradient: AppColors.primaryGradient,
+                borderRadius: AppSpacing.borderRadiusSm,
               ),
               child: const Text(
                 'L',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                  fontSize: 18,
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Text(
               'Lakshya',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-              ),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: AppColors.classicBlue,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),
-        actions: isMobile
-            ? [
-                IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () {
-                    _showMobileMenu(context);
-                  },
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {
+              // Show notifications
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('No new notifications'),
+                  behavior: SnackBarBehavior.floating,
                 ),
-              ]
-            : [
-                TextButton(
-                  onPressed: () => context.go('/courses'),
-                  child: const Text('Courses'),
-                ),
-                TextButton(
-                  onPressed: () => context.go('/about'),
-                  child: const Text('About'),
-                ),
-                TextButton(
-                  onPressed: () => context.go('/contact'),
-                  child: const Text('Contact'),
-                ),
-                const SizedBox(width: 8),
-              ],
+              );
+            },
+          ),
+          const SizedBox(width: AppSpacing.xs),
+        ],
       ),
-      drawer: isMobile ? _buildDrawer(context) : null,
       body: RefreshIndicator(
         onRefresh: () async {
-          // Refresh courses
           await Future.delayed(const Duration(seconds: 1));
         },
         child: SingleChildScrollView(
@@ -89,24 +76,45 @@ class HomeScreen extends StatelessWidget {
 
               // Popular Courses Section
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(AppSpacing.screenPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Popular Courses',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Popular Courses',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            const SizedBox(height: AppSpacing.xs),
+                            Text(
+                              'Start your journey with our top programs',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: AppColors.neutral500,
+                                  ),
+                            ),
+                          ],
+                        ),
+                        TextButton.icon(
+                          onPressed: () => context.go('/courses'),
+                          icon: const Icon(Icons.arrow_forward, size: 18),
+                          label: const Text('View All'),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Start your journey with our top programs',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                    ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.lg),
                     SizedBox(
                       height: 340,
                       child: ListView.builder(
@@ -115,25 +123,21 @@ class HomeScreen extends StatelessWidget {
                         itemBuilder: (context, index) {
                           return Padding(
                             padding: EdgeInsets.only(
-                              right: index < popularCourses.length - 1 ? 16 : 0,
+                              right: index < popularCourses.length - 1
+                                  ? AppSpacing.lg
+                                  : 0,
                             ),
                             child: CourseCard(
                               course: popularCourses[index],
                               onTap: () {
-                                courseProvider.selectCourse(popularCourses[index]);
-                                context.go('/course/${popularCourses[index].id}');
+                                courseProvider
+                                    .selectCourse(popularCourses[index]);
+                                context
+                                    .go('/course/${popularCourses[index].id}');
                               },
                             ),
                           );
                         },
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: () => context.go('/courses'),
-                        child: const Text('View All Courses'),
                       ),
                     ),
                   ],
@@ -150,50 +154,7 @@ class HomeScreen extends StatelessWidget {
               const CtaSection(),
 
               // Footer
-              Container(
-                padding: const EdgeInsets.all(24),
-                color: Theme.of(context).colorScheme.primary,
-                child: Column(
-                  children: [
-                    Text(
-                      'Lakshya Institute',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Leading Institute for Commerce Professional Courses',
-                      style: TextStyle(color: Colors.white70),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _FooterLink(
-                          label: 'Courses',
-                          onTap: () => context.go('/courses'),
-                        ),
-                        _FooterLink(
-                          label: 'About',
-                          onTap: () => context.go('/about'),
-                        ),
-                        _FooterLink(
-                          label: 'Contact',
-                          onTap: () => context.go('/contact'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      '© 2024 Lakshya Institute. All rights reserved.',
-                      style: TextStyle(color: Colors.white54, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
+              _buildFooter(context),
             ],
           ),
         ),
@@ -201,129 +162,105 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _showMobileMenu(BuildContext context) {
-    Scaffold.of(context).openDrawer();
-  }
-
-  Widget _buildDrawer(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+  Widget _buildFooter(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.xxl),
+      decoration: const BoxDecoration(
+        gradient: AppColors.heroGradient,
+      ),
+      child: Column(
         children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).colorScheme.primary,
-                  Theme.of(context).colorScheme.secondary,
-                ],
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    'L',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
-                    ),
-                  ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: AppSpacing.borderRadiusSm,
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Lakshya Institute',
+                child: const Text(
+                  'L',
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
+                    color: AppColors.classicBlue,
                     fontWeight: FontWeight.bold,
+                    fontSize: 20,
                   ),
                 ),
-                const Text(
-                  'Commerce Professional Courses',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Text(
+                'Lakshya Institute',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Leading Institute for Commerce Professional Courses',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.white70,
                 ),
-              ],
-            ),
+            textAlign: TextAlign.center,
           ),
-          ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Home'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/');
-            },
+          const SizedBox(height: AppSpacing.xxl),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _SocialIcon(
+                icon: Icons.language,
+                onTap: () {},
+              ),
+              _SocialIcon(
+                icon: Icons.email_outlined,
+                onTap: () => context.go('/contact'),
+              ),
+              _SocialIcon(
+                icon: Icons.phone_outlined,
+                onTap: () {},
+              ),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.school),
-            title: const Text('Courses'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/courses');
-            },
+          const SizedBox(height: AppSpacing.xxl),
+          const Divider(color: Colors.white24, height: 1),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            '© 2024 Lakshya Institute. All rights reserved.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.white54,
+                ),
           ),
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text('About Us'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/about');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.contact_mail),
-            title: const Text('Contact Us'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/contact');
-            },
-          ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                context.go('/contact');
-              },
-              child: const Text('Get Started'),
-            ),
-          ),
+          // Add padding for bottom nav
+          const SizedBox(height: AppSpacing.lg),
         ],
       ),
     );
   }
 }
 
-class _FooterLink extends StatelessWidget {
-  final String label;
+class _SocialIcon extends StatelessWidget {
+  final IconData icon;
   final VoidCallback onTap;
 
-  const _FooterLink({
-    required this.label,
+  const _SocialIcon({
+    required this.icon,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: onTap,
-      child: Text(
-        label,
-        style: const TextStyle(color: Colors.white),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      child: IconButton(
+        onPressed: onTap,
+        icon: Icon(icon, color: Colors.white),
+        style: IconButton.styleFrom(
+          backgroundColor: Colors.white.withValues(alpha: 0.1),
+          padding: const EdgeInsets.all(AppSpacing.md),
+        ),
       ),
     );
   }
