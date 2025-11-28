@@ -9,6 +9,7 @@ class WhatsAppFab extends StatefulWidget {
   final String? prefilledMessage;
   final bool showLabel;
   final bool extended;
+  final String? heroTag;
 
   const WhatsAppFab({
     super.key,
@@ -16,6 +17,7 @@ class WhatsAppFab extends StatefulWidget {
     this.prefilledMessage,
     this.showLabel = false,
     this.extended = false,
+    this.heroTag,
   });
 
   @override
@@ -94,7 +96,7 @@ class _WhatsAppFabState extends State<WhatsAppFab>
       child: ScaleTransition(
         scale: _scaleAnimation,
         child: FloatingActionButton(
-          heroTag: 'whatsapp_fab_${widget.phoneNumber}',
+          heroTag: widget.heroTag ?? 'whatsapp_fab_${widget.phoneNumber}',
           onPressed: _openWhatsApp,
           backgroundColor: whatsAppGreen,
           foregroundColor: Colors.white,
@@ -119,7 +121,7 @@ class _WhatsAppFabState extends State<WhatsAppFab>
       child: ScaleTransition(
         scale: _scaleAnimation,
         child: FloatingActionButton.extended(
-          heroTag: 'whatsapp_fab_extended_${widget.phoneNumber}',
+          heroTag: widget.heroTag ?? 'whatsapp_fab_extended_${widget.phoneNumber}',
           onPressed: _openWhatsApp,
           backgroundColor: whatsAppGreen,
           foregroundColor: Colors.white,

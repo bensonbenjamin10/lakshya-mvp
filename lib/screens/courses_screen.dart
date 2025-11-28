@@ -103,6 +103,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
       floatingActionButton: const WhatsAppFab(
         phoneNumber: AppConfig.whatsAppNumber,
         prefilledMessage: AppConfig.whatsAppCourseInquiry,
+        heroTag: 'whatsapp_fab_courses',
       ),
     );
   }

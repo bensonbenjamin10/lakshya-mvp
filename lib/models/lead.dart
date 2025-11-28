@@ -151,9 +151,8 @@ class Lead extends BaseModel {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
+  Map<String, dynamic> toJson({bool includeId = true, bool forInsert = false}) {
+    final json = <String, dynamic>{
       'name': name,
       'email': email,
       'phone': phone,
@@ -161,13 +160,47 @@ class Lead extends BaseModel {
       'inquiry_type': inquiryTypeString,
       'course_id': courseId,
       'message': message,
-      'source': sourceString,
-      'status': statusString,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
-      'assigned_to': assignedTo,
-      'notes': notes,
     };
+    
+    // Only include id if it's a valid UUID format (contains dashes) or if explicitly requested
+    if (includeId && _isValidUuid(id)) {
+      json['id'] = id;
+    }
+    
+    // For inserts, exclude timestamps and fields with defaults - let database handle them
+    if (!forInsert) {
+      json['source'] = sourceString;
+      json['status'] = statusString;
+      json['created_at'] = createdAt.toIso8601String();
+      if (updatedAt != null) {
+        json['updated_at'] = updatedAt!.toIso8601String();
+      }
+      json['assigned_to'] = assignedTo;
+      json['notes'] = notes;
+    }
+    // For inserts, only include source/status if they're not the defaults
+    else {
+      // Only include source if it's not the default 'website'
+      if (source != LeadSource.website) {
+        json['source'] = sourceString;
+      }
+      // Only include status if it's not the default 'new'
+      if (status != LeadStatus.newLead) {
+        json['status'] = statusString;
+      }
+    }
+    
+    return json;
+  }
+  
+  /// Check if a string is a valid UUID format
+  bool _isValidUuid(String value) {
+    // UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    final uuidRegex = RegExp(
+      r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+      caseSensitive: false,
+    );
+    return uuidRegex.hasMatch(value);
   }
 
   factory Lead.fromJson(Map<String, dynamic> json) {

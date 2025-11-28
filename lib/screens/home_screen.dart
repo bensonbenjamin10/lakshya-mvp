@@ -208,6 +208,7 @@ class HomeScreen extends StatelessWidget {
       floatingActionButton: const WhatsAppFab(
         phoneNumber: AppConfig.whatsAppNumber,
         prefilledMessage: AppConfig.whatsAppDefaultMessage,
+        heroTag: 'whatsapp_fab_home',
       ),
     );
   }

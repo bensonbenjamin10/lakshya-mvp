@@ -43,13 +43,25 @@ class LeadRepository implements BaseRepository<Lead> {
   @override
   Future<Lead> create(Lead entity) async {
     try {
-      final response = await _client
-          .from('leads')
-          .insert(entity.toJson())
-          .select()
-          .single();
-
-      return Lead.fromJson(response);
+      // Use the create_lead function which bypasses RLS with security definer
+      // This ensures anonymous users can create leads
+      final jsonData = entity.toJson(includeId: false, forInsert: true);
+      
+      final response = await _client.rpc('create_lead', params: {
+        'p_name': jsonData['name'] as String,
+        'p_email': jsonData['email'] as String,
+        'p_phone': jsonData['phone'] as String,
+        'p_country': jsonData['country'] as String?,
+        'p_inquiry_type': jsonData['inquiry_type'] as String,
+        'p_course_id': jsonData['course_id'] as String?,
+        'p_message': jsonData['message'] as String?,
+      });
+      
+      // The function returns the full lead as JSONB
+      // Supabase RPC wraps the result, so we need to extract it
+      final responseMap = response as Map<String, dynamic>;
+      final leadJson = responseMap['create_lead'] as Map<String, dynamic>? ?? responseMap;
+      return Lead.fromJson(leadJson);
     } catch (e) {
       throw Exception('Failed to create lead: $e');
     }

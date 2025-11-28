@@ -153,6 +153,7 @@ class ContactScreen extends StatelessWidget {
       floatingActionButton: const WhatsAppFab(
         phoneNumber: AppConfig.whatsAppNumber,
         prefilledMessage: AppConfig.whatsAppDefaultMessage,
+        heroTag: 'whatsapp_fab_contact',
       ),
     );
   }
