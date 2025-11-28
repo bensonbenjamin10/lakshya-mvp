@@ -92,7 +92,7 @@ class HeroSection extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.lg),
               // Course tags
-              Wrap(
+              const Wrap(
                 alignment: WrapAlignment.center,
                 spacing: AppSpacing.sm,
                 runSpacing: AppSpacing.sm,
@@ -242,14 +242,14 @@ class HeroSection extends StatelessWidget {
                   color: AppColors.neutral0.withValues(alpha: 0.1),
                   borderRadius: AppSpacing.borderRadiusLg,
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const _StatItem(value: '10K+', label: 'Students'),
-                    const _StatDivider(),
-                    const _StatItem(value: '95%', label: 'Pass Rate'),
-                    const _StatDivider(),
-                    const _StatItem(value: '500+', label: 'Placements'),
+                    _StatItem(value: '10K+', label: 'Students'),
+                    _StatDivider(),
+                    _StatItem(value: '95%', label: 'Pass Rate'),
+                    _StatDivider(),
+                    _StatItem(value: '500+', label: 'Placements'),
                   ],
                 ),
               ),

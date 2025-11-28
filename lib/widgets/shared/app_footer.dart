@@ -19,7 +19,7 @@ class AppFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xxl),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -70,7 +70,7 @@ class AppFooter extends StatelessWidget {
             _buildSocialIcons(context),
           ],
           const SizedBox(height: AppSpacing.xl),
-          Divider(color: AppColors.classicBlue20, height: 1),
+          const Divider(color: AppColors.classicBlue20, height: 1),
           const SizedBox(height: AppSpacing.md),
           Text(
             '© ${DateTime.now().year} Lakshya Institute. All rights reserved.',

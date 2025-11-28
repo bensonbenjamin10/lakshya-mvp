@@ -111,7 +111,7 @@ class CourseCardSkeleton extends StatelessWidget {
         borderRadius: AppSpacing.borderRadiusMd,
         border: Border.all(color: AppColors.neutral200),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Image placeholder
@@ -124,29 +124,29 @@ class CourseCardSkeleton extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
+            padding: EdgeInsets.all(AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Category badge
-                const SkeletonLoader(width: 60, height: 20),
-                const SizedBox(height: AppSpacing.sm),
+                SkeletonLoader(width: 60, height: 20),
+                SizedBox(height: AppSpacing.sm),
                 // Title
-                const SkeletonLoader(width: double.infinity, height: 20),
-                const SizedBox(height: AppSpacing.xs),
-                const SkeletonLoader(width: 180, height: 20),
-                const SizedBox(height: AppSpacing.md),
+                SkeletonLoader(width: double.infinity, height: 20),
+                SizedBox(height: AppSpacing.xs),
+                SkeletonLoader(width: 180, height: 20),
+                SizedBox(height: AppSpacing.md),
                 // Description
-                const SkeletonLoader(width: double.infinity, height: 14),
-                const SizedBox(height: AppSpacing.xs),
-                const SkeletonLoader(width: 200, height: 14),
-                const SizedBox(height: AppSpacing.lg),
+                SkeletonLoader(width: double.infinity, height: 14),
+                SizedBox(height: AppSpacing.xs),
+                SkeletonLoader(width: 200, height: 14),
+                SizedBox(height: AppSpacing.lg),
                 // Meta info
                 Row(
                   children: [
-                    const SkeletonLoader(width: 80, height: 14),
-                    const Spacer(),
-                    const SkeletonLoader.circle(size: 24),
+                    SkeletonLoader(width: 80, height: 14),
+                    Spacer(),
+                    SkeletonLoader.circle(size: 24),
                   ],
                 ),
               ],
@@ -171,40 +171,42 @@ class CourseListItemSkeleton extends StatelessWidget {
         borderRadius: AppSpacing.borderRadiusLg,
         border: Border.all(color: AppColors.neutral200),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Top section with icon and badges
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.lg),
+          DecoratedBox(
             decoration: BoxDecoration(
               color: AppColors.neutral50,
-              borderRadius: const BorderRadius.vertical(
+              borderRadius: BorderRadius.vertical(
                 top: Radius.circular(AppSpacing.radiusLg),
               ),
             ),
-            child: Row(
-              children: [
-                // Icon placeholder
-                const SkeletonLoader(width: 48, height: 48),
-                const SizedBox(width: AppSpacing.md),
-                // Badges
-                Row(
-                  children: [
-                    const SkeletonLoader(width: 60, height: 22),
-                    const SizedBox(width: AppSpacing.sm),
-                    const SkeletonLoader(width: 70, height: 22),
-                  ],
-                ),
-                const Spacer(),
-                // Favorite placeholder
-                const SkeletonLoader.circle(size: 24),
-              ],
+            child: Padding(
+              padding: EdgeInsets.all(AppSpacing.lg),
+              child: Row(
+                children: [
+                  // Icon placeholder
+                  SkeletonLoader(width: 48, height: 48),
+                  SizedBox(width: AppSpacing.md),
+                  // Badges
+                  Row(
+                    children: [
+                      SkeletonLoader(width: 60, height: 22),
+                      SizedBox(width: AppSpacing.sm),
+                      SkeletonLoader(width: 70, height: 22),
+                    ],
+                  ),
+                  Spacer(),
+                  // Favorite placeholder
+                  SkeletonLoader.circle(size: 24),
+                ],
+              ),
             ),
           ),
           // Content section
           Padding(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               AppSpacing.lg,
               AppSpacing.md,
               AppSpacing.lg,
@@ -214,23 +216,23 @@ class CourseListItemSkeleton extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Title
-                const SkeletonLoader(width: double.infinity, height: 20),
-                const SizedBox(height: AppSpacing.xs),
-                const SkeletonLoader(width: 200, height: 20),
-                const SizedBox(height: AppSpacing.md),
+                SkeletonLoader(width: double.infinity, height: 20),
+                SizedBox(height: AppSpacing.xs),
+                SkeletonLoader(width: 200, height: 20),
+                SizedBox(height: AppSpacing.md),
                 // Description
-                const SkeletonLoader(width: double.infinity, height: 16),
-                const SizedBox(height: AppSpacing.xs),
-                const SkeletonLoader(width: 250, height: 16),
-                const SizedBox(height: AppSpacing.lg),
+                SkeletonLoader(width: double.infinity, height: 16),
+                SizedBox(height: AppSpacing.xs),
+                SkeletonLoader(width: 250, height: 16),
+                SizedBox(height: AppSpacing.lg),
                 // Footer
                 Row(
                   children: [
-                    const SkeletonLoader(width: 90, height: 28),
-                    const SizedBox(width: AppSpacing.md),
-                    const SkeletonLoader(width: 80, height: 28),
-                    const Spacer(),
-                    const SkeletonLoader(width: 70, height: 32),
+                    SkeletonLoader(width: 90, height: 28),
+                    SizedBox(width: AppSpacing.md),
+                    SkeletonLoader(width: 80, height: 28),
+                    Spacer(),
+                    SkeletonLoader(width: 70, height: 32),
                   ],
                 ),
               ],

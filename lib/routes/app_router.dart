@@ -154,7 +154,7 @@ class AppRouter {
 
 /// Custom page transition with configurable duration
 class AppPageTransition<T> extends CustomTransitionPage<T> {
-  AppPageTransition({
+  const AppPageTransition({
     required super.child,
     super.transitionDuration = const Duration(milliseconds: 300),
     super.reverseTransitionDuration = const Duration(milliseconds: 250),

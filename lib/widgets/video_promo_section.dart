@@ -179,7 +179,7 @@ class _FeaturedVideoCard extends StatelessWidget {
               fit: StackFit.expand,
               children: [
                 // Background Gradient
-                Container(
+                const DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,

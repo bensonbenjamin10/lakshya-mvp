@@ -8,7 +8,7 @@ class TestimonialsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final testimonials = [
-      _TestimonialData(
+      const _TestimonialData(
         name: 'Priya Sharma',
         course: 'ACCA Graduate',
         text: 'Lakshya Institute helped me achieve my ACCA qualification. The faculty is excellent and the support throughout the journey was incredible.',
@@ -16,7 +16,7 @@ class TestimonialsSection extends StatelessWidget {
         avatarColor: AppColors.accaColor,
         courseColor: AppColors.accaColor,
       ),
-      _TestimonialData(
+      const _TestimonialData(
         name: 'Rahul Kumar',
         course: 'CA Final',
         text: 'The comprehensive CA program at Lakshya prepared me well for my career. I\'m now working at a top accounting firm.',
@@ -24,7 +24,7 @@ class TestimonialsSection extends StatelessWidget {
         avatarColor: AppColors.caColor,
         courseColor: AppColors.caColor,
       ),
-      _TestimonialData(
+      const _TestimonialData(
         name: 'Anjali Patel',
         course: 'CMA (US)',
         text: 'The CMA program opened doors to international opportunities. Outstanding course structure and guidance.',
@@ -32,7 +32,7 @@ class TestimonialsSection extends StatelessWidget {
         avatarColor: AppColors.cmaColor,
         courseColor: AppColors.cmaColor,
       ),
-      _TestimonialData(
+      const _TestimonialData(
         name: 'Vikram Singh',
         course: 'MBA Graduate',
         text: 'The B.Com & MBA program gave me a strong foundation. The practical approach to learning is what sets Lakshya apart.',
@@ -46,7 +46,7 @@ class TestimonialsSection extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
         vertical: AppSpacing.sectionSpacing,
       ),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -59,9 +59,9 @@ class TestimonialsSection extends StatelessWidget {
       child: Column(
         children: [
           // Section header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
-            child: const _SectionHeader(
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
+            child: _SectionHeader(
               title: 'Student Success Stories',
               subtitle: 'Hear from our 10,000+ alumni',
               icon: Icons.format_quote_rounded,
@@ -87,17 +87,17 @@ class TestimonialsSection extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xxl),
           // Trust indicators
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const _TrustBadge(
+                _TrustBadge(
                   icon: Icons.verified_user_rounded,
                   label: 'Verified Reviews',
                 ),
-                const SizedBox(width: AppSpacing.xl),
-                const _TrustBadge(
+                SizedBox(width: AppSpacing.xl),
+                _TrustBadge(
                   icon: Icons.stars_rounded,
                   label: '4.9 Rating',
                 ),
@@ -279,8 +279,8 @@ class _TestimonialCard extends StatelessWidget {
           Row(
             children: List.generate(
               testimonial.rating,
-              (i) => Padding(
-                padding: const EdgeInsets.only(right: 2),
+              (i) => const Padding(
+                padding: EdgeInsets.only(right: 2),
                 child: Icon(
                   Icons.star_rounded,
                   color: AppColors.mimosaGold,

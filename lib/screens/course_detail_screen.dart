@@ -217,7 +217,7 @@ class CourseDetailScreen extends StatelessWidget {
                               label: 'English',
                               color: courseColor,
                             ),
-                            _InfoChip(
+                            const _InfoChip(
                               icon: Icons.verified_rounded,
                               label: 'Certified',
                               color: AppColors.success,
@@ -264,7 +264,7 @@ class CourseDetailScreen extends StatelessWidget {
                   ),
 
                   // Key Features Section
-                  _SectionContainer(
+                  const _SectionContainer(
                     title: 'Key Features',
                     icon: Icons.star_outline_rounded,
                     iconColor: AppColors.vivaMagenta,

@@ -11,37 +11,37 @@ class FeaturesSection extends StatelessWidget {
     final isMobile = screenWidth < AppSpacing.breakpointMobile;
 
     final features = [
-      _FeatureData(
+      const _FeatureData(
         icon: Icons.public_rounded,
         title: 'Global Recognition',
         description: 'ACCA, CA & CMA accepted worldwide',
         color: AppColors.classicBlue,
       ),
-      _FeatureData(
+      const _FeatureData(
         icon: Icons.school_rounded,
         title: 'Expert Faculty',
         description: 'Chartered Accountants from Big 4',
         color: AppColors.ultramarine,
       ),
-      _FeatureData(
+      const _FeatureData(
         icon: Icons.trending_up_rounded,
         title: '95% Pass Rate',
         description: 'Consistently above national average',
         color: AppColors.success,
       ),
-      _FeatureData(
+      const _FeatureData(
         icon: Icons.schedule_rounded,
         title: 'Flexible Batches',
         description: 'Weekday, weekend & online options',
         color: AppColors.vivaMagenta,
       ),
-      _FeatureData(
+      const _FeatureData(
         icon: Icons.work_rounded,
         title: '500+ Placements',
         description: 'Top firms recruit from campus',
         color: AppColors.mimosaGold,
       ),
-      _FeatureData(
+      const _FeatureData(
         icon: Icons.support_agent_rounded,
         title: 'Lifetime Support',
         description: 'Career guidance even after course',

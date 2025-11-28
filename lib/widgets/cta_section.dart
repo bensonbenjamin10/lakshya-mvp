@@ -19,7 +19,7 @@ class CtaSection extends StatelessWidget {
       ),
       padding: EdgeInsets.all(isMobile ? AppSpacing.xxl : AppSpacing.xxxl),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [

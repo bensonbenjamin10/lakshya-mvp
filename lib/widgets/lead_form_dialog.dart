@@ -175,11 +175,11 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
+            content: const Row(
               children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: AppSpacing.sm),
-                const Expanded(
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: AppSpacing.sm),
+                Expanded(
                   child: Text('Thank you! We\'ll get back to you soon.'),
                 ),
               ],
@@ -194,11 +194,11 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
+            content: const Row(
               children: [
-                const Icon(Icons.error_outline, color: Colors.white),
-                const SizedBox(width: AppSpacing.sm),
-                const Expanded(
+                Icon(Icons.error_outline, color: Colors.white),
+                SizedBox(width: AppSpacing.sm),
+                Expanded(
                   child: Text('Something went wrong. Please try again.'),
                 ),
               ],
@@ -338,9 +338,9 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.xxl),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: AppColors.primaryGradient,
-        borderRadius: const BorderRadius.vertical(
+        borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),
         ),
       ),
@@ -413,7 +413,7 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
         ),
         const SizedBox(height: AppSpacing.sm),
         DropdownButtonFormField<LeadSource>(
-          value: _selectedSource,
+          initialValue: _selectedSource,
           isExpanded: true,
           icon: const Icon(
             Icons.keyboard_arrow_down_rounded,

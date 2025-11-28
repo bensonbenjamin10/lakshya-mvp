@@ -175,7 +175,7 @@ class _VimeoPlayerState extends State<VimeoPlayer> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.error_outline_rounded,
                           color: AppColors.neutral400,
                           size: 48,

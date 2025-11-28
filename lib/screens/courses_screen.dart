@@ -117,7 +117,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
             AppSpacing.screenPadding,
             AppSpacing.lg,
           ),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,

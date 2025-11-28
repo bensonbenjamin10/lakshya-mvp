@@ -166,7 +166,7 @@ class ContactScreen extends StatelessWidget {
             horizontal: AppSpacing.screenPadding,
             vertical: AppSpacing.xxxl,
           ),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
