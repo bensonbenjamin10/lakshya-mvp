@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@800&amp;display=swap');
+    </style>
+  </defs>
+  
+  <!-- Transparent background for adaptive icon foreground -->
+  
+  <!-- Blue rounded square background - centered for adaptive icon safe zone -->
+  <rect x="212" y="262" width="600" height="600" rx="80" fill="#0F4C81"/>
+  
+  <!-- Large "L" letter -->
+  <text x="350" y="740" 
+        font-family="Nunito, Arial, sans-serif" 
+        font-weight="800" 
+        font-size="520" 
+        fill="#FFFFFF">L</text>
+  
+  <!-- Yellow/Gold accent triangle (top right) -->
+  <path d="M812 64 L984 64 L984 236 Z" fill="#E8A838"/>
+  
+  <!-- Small yellow accent dot -->
+  <circle cx="720" cy="760" r="40" fill="#E8A838"/>
+</svg>

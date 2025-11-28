@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../theme/colors.dart';
 import '../theme/spacing.dart';
 
@@ -88,7 +89,7 @@ class LakshyaLogoResponsive extends StatelessWidget {
   }
 }
 
-/// Temporary placeholder shown only when image file is missing
+/// Styled placeholder matching brand identity - shown when image is missing
 class _LogoPlaceholder extends StatelessWidget {
   final double height;
 
@@ -96,38 +97,94 @@ class _LogoPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    // Calculate width based on logo aspect ratio (4.5:1)
+    final width = height * 4.5;
+    
+    return SizedBox(
       height: height,
-      padding: EdgeInsets.symmetric(horizontal: height * 0.2),
-      decoration: BoxDecoration(
-        color: AppColors.classicBlue10,
-        borderRadius: BorderRadius.circular(height * 0.15),
-        border: Border.all(
-          color: AppColors.classicBlue20,
-          width: 1,
-        ),
-      ),
+      width: width,
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(
-            Icons.image_outlined,
-            size: height * 0.5,
-            color: AppColors.classicBlue40,
-          ),
-          SizedBox(width: height * 0.1),
+          // Styled "L" icon
+          _BrandedL(size: height * 0.9),
+          SizedBox(width: height * 0.15),
+          // "akshya" text
           Text(
-            'Lakshya',
-            style: TextStyle(
+            'akshya',
+            style: GoogleFonts.nunito(
               color: AppColors.classicBlue,
-              fontSize: height * 0.35,
-              fontWeight: FontWeight.w700,
+              fontSize: height * 0.65,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
             ),
+          ),
+          // Yellow accent
+          Transform.translate(
+            offset: Offset(-height * 0.05, -height * 0.25),
+            child: _YellowAccent(size: height * 0.35),
           ),
         ],
       ),
     );
   }
+}
+
+/// Branded "L" letter matching the logo style
+class _BrandedL extends StatelessWidget {
+  final double size;
+  
+  const _BrandedL({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      'L',
+      style: GoogleFonts.nunito(
+        color: AppColors.classicBlue,
+        fontSize: size,
+        fontWeight: FontWeight.w800,
+        height: 1.0,
+      ),
+    );
+  }
+}
+
+/// Yellow accent triangle matching the logo
+class _YellowAccent extends StatelessWidget {
+  final double size;
+  
+  const _YellowAccent({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(size, size),
+      painter: _TrianglePainter(),
+    );
+  }
+}
+
+class _TrianglePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.mimosaGold
+      ..style = PaintingStyle.fill;
+    
+    final path = Path()
+      ..moveTo(size.width * 0.3, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width, size.height * 0.7)
+      ..close();
+    
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 /// Full logo with tagline (for about page, footer, etc.)

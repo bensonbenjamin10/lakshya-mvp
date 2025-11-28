@@ -179,29 +179,33 @@ class AboutScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  const _ProgramItem(
+                  _ProgramItem(
                     icon: Icons.account_balance_rounded,
                     color: AppColors.classicBlue,
                     title: 'ACCA',
                     description: 'Association of Chartered Certified Accountants',
+                    courseId: 'acca-001',
                   ),
-                  const _ProgramItem(
+                  _ProgramItem(
                     icon: Icons.balance_rounded,
                     color: AppColors.ultramarine,
                     title: 'CA',
                     description: 'Chartered Accountancy - Premier qualification',
+                    courseId: 'ca-001',
                   ),
-                  const _ProgramItem(
+                  _ProgramItem(
                     icon: Icons.analytics_rounded,
                     color: AppColors.success,
                     title: 'CMA (US)',
                     description: 'Certified Management Accountant',
+                    courseId: 'cma-001',
                   ),
-                  const _ProgramItem(
+                  _ProgramItem(
                     icon: Icons.business_center_rounded,
                     color: AppColors.mimosaGold,
                     title: 'B.Com & MBA',
                     description: 'Integrated dual degree program',
+                    courseId: 'bcom-mba-001',
                   ),
 
                   const SizedBox(height: AppSpacing.xxxl),
@@ -382,12 +386,14 @@ class _ProgramItem extends StatelessWidget {
   final Color color;
   final String title;
   final String description;
+  final String courseId;
 
   const _ProgramItem({
     required this.icon,
     required this.color,
     required this.title,
     required this.description,
+    required this.courseId,
   });
 
   @override
@@ -399,39 +405,56 @@ class _ProgramItem extends StatelessWidget {
         borderRadius: AppSpacing.borderRadiusMd,
         side: const BorderSide(color: AppColors.neutral200),
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.sm,
-        ),
-        leading: Container(
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [color, color.withValues(alpha: 0.7)],
-            ),
-            borderRadius: AppSpacing.borderRadiusSm,
+      child: InkWell(
+        onTap: () => context.push('/course/$courseId'),
+        borderRadius: AppSpacing.borderRadiusMd,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
           ),
-          child: Icon(icon, color: Colors.white, size: AppSpacing.iconSm),
-        ),
-        title: Text(
-          title,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [color, color.withValues(alpha: 0.7)],
+                  ),
+                  borderRadius: AppSpacing.borderRadiusSm,
+                ),
+                child: Icon(icon, color: Colors.white, size: AppSpacing.iconSm),
               ),
-        ),
-        subtitle: Text(
-          description,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.neutral500,
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      description,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.neutral500,
+                          ),
+                    ),
+                  ],
+                ),
               ),
-        ),
-        trailing: Icon(
-          Icons.arrow_forward_ios_rounded,
-          size: 16,
-          color: color,
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: color,
+              ),
+            ],
+          ),
         ),
       ),
     );
