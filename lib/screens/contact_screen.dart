@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:lakshya_mvp/models/lead.dart';
 import 'package:lakshya_mvp/widgets/lead_form_dialog.dart';
+import 'package:lakshya_mvp/widgets/shared/whatsapp_fab.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
+import 'package:lakshya_mvp/config/app_config.dart';
 
 class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,51 +29,18 @@ class ContactScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppSpacing.xxl),
-              decoration: const BoxDecoration(
-                gradient: AppColors.primaryGradient,
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: AppSpacing.borderRadiusMd,
-                    ),
-                    child: const Icon(
-                      Icons.support_agent_rounded,
-                      size: AppSpacing.iconXxl,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    'Get in Touch',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'We\'d love to hear from you.\nOur team is always here to help.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.9),
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
+            _buildHeader(context),
 
             Padding(
               padding: const EdgeInsets.all(AppSpacing.screenPadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // WhatsApp Quick Contact - Highlighted
+                  _buildWhatsAppSection(context),
+                  
+                  const SizedBox(height: AppSpacing.xxl),
+
                   // Contact Information Section
                   Text(
                     'Contact Information',
@@ -72,21 +50,21 @@ class ContactScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.lg),
 
-                  // Contact Cards Grid
+                  // Contact Cards
                   _ContactCard(
                     icon: Icons.email_outlined,
                     title: 'Email Us',
                     content: 'info@lakshyainstitute.com',
                     color: AppColors.classicBlue,
-                    onTap: () {},
+                    onTap: () => _launchUrl('mailto:info@lakshyainstitute.com'),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   _ContactCard(
                     icon: Icons.phone_outlined,
                     title: 'Call Us',
-                    content: '+91-XXXXX-XXXXX',
+                    content: AppConfig.contactPhone,
                     color: AppColors.success,
-                    onTap: () {},
+                    onTap: () => _launchUrl('tel:+${AppConfig.whatsAppNumber}'),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   _ContactCard(
@@ -122,6 +100,7 @@ class ContactScreen extends StatelessWidget {
                     description: 'Get in touch with our team',
                     gradient: AppColors.primaryGradient,
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       showDialog(
                         context: context,
                         builder: (context) => const LeadFormDialog(
@@ -137,6 +116,7 @@ class ContactScreen extends StatelessWidget {
                     description: 'Download course materials',
                     gradient: AppColors.accentGradient,
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       showDialog(
                         context: context,
                         builder: (context) => const LeadFormDialog(
@@ -152,6 +132,7 @@ class ContactScreen extends StatelessWidget {
                     description: 'Ask about our programs',
                     gradient: AppColors.ctaGradient,
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       showDialog(
                         context: context,
                         builder: (context) => const LeadFormDialog(
@@ -161,12 +142,287 @@ class ContactScreen extends StatelessWidget {
                     },
                   ),
 
-                  // Bottom padding for navigation bar
+                  // Bottom padding
                   const SizedBox(height: AppSpacing.xxl),
                 ],
               ),
             ),
           ],
+        ),
+      ),
+      floatingActionButton: const WhatsAppFab(
+        phoneNumber: AppConfig.whatsAppNumber,
+        prefilledMessage: AppConfig.whatsAppDefaultMessage,
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Stack(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.screenPadding,
+            vertical: AppSpacing.xxxl,
+          ),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.white,
+                AppColors.classicBlue10,
+              ],
+            ),
+          ),
+          child: Column(
+            children: [
+              // Icon
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                decoration: BoxDecoration(
+                  color: AppColors.classicBlue.withValues(alpha: 0.1),
+                  borderRadius: AppSpacing.borderRadiusMd,
+                ),
+                child: const Icon(
+                  Icons.support_agent_rounded,
+                  size: AppSpacing.iconXl,
+                  color: AppColors.classicBlue,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                'Get in Touch',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: AppColors.neutral900,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'We\'d love to hear from you.\nOur team is always here to help.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.neutral600,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              // Response time badge
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withValues(alpha: 0.1),
+                  borderRadius: AppSpacing.borderRadiusFull,
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.check_circle_rounded,
+                      size: 14,
+                      color: AppColors.success,
+                    ),
+                    SizedBox(width: AppSpacing.xs),
+                    Text(
+                      'Usually responds within 24 hours',
+                      style: TextStyle(
+                        color: AppColors.success,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Golden accent
+        Positioned(
+          top: 0,
+          right: 0,
+          child: Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.topRight,
+                radius: 1.0,
+                colors: [
+                  AppColors.mimosaGold.withValues(alpha: 0.25),
+                  AppColors.mimosaGold.withValues(alpha: 0.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWhatsAppSection(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF25D366), Color(0xFF128C7E)],
+        ),
+        borderRadius: AppSpacing.borderRadiusLg,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF25D366).withValues(alpha: 0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () async {
+            HapticFeedback.mediumImpact();
+            final url = 'https://wa.me/${AppConfig.whatsAppNumber}?text=${Uri.encodeComponent(AppConfig.whatsAppContactMessage)}';
+            final uri = Uri.parse(url);
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
+          },
+          borderRadius: AppSpacing.borderRadiusLg,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top row with icon and badge
+                Row(
+                  children: [
+                    // WhatsApp Icon
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: AppSpacing.borderRadiusMd,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.chat_rounded,
+                        color: Color(0xFF25D366),
+                        size: 28,
+                      ),
+                    ),
+                    const Spacer(),
+                    // Online badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: AppSpacing.borderRadiusFull,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          const Text(
+                            'Online Now',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                // Title
+                Text(
+                  'Chat with us on WhatsApp',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                // Description
+                Text(
+                  'Get instant responses to your queries. Tap to start a conversation.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        height: 1.4,
+                      ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                // CTA Row
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: AppSpacing.md,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: AppSpacing.borderRadiusFull,
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Start Chat',
+                            style: TextStyle(
+                              color: Color(0xFF128C7E),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          SizedBox(width: AppSpacing.sm),
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Color(0xFF128C7E),
+                            size: 18,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    // Response time
+                    Text(
+                      'Avg. reply: 5 min',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -194,10 +450,13 @@ class _ContactCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: AppSpacing.borderRadiusMd,
-        side: BorderSide(color: AppColors.neutral200),
+        side: const BorderSide(color: AppColors.neutral200),
       ),
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
         borderRadius: AppSpacing.borderRadiusMd,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -236,7 +495,7 @@ class _ContactCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(
+              const Icon(
                 Icons.chevron_right_rounded,
                 color: AppColors.neutral400,
                 size: AppSpacing.iconMd,

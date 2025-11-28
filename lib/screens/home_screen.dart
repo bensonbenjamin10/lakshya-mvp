@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:lakshya_mvp/providers/course_provider.dart';
+import 'package:lakshya_mvp/providers/theme_provider.dart';
 import 'package:lakshya_mvp/widgets/course_card.dart';
 import 'package:lakshya_mvp/widgets/hero_section.dart';
 import 'package:lakshya_mvp/widgets/features_section.dart';
 import 'package:lakshya_mvp/widgets/testimonials_section.dart';
 import 'package:lakshya_mvp/widgets/cta_section.dart';
 import 'package:lakshya_mvp/widgets/video_promo_section.dart';
+import 'package:lakshya_mvp/widgets/lakshya_logo.dart';
+import 'package:lakshya_mvp/widgets/shared/app_footer.dart';
+import 'package:lakshya_mvp/widgets/shared/whatsapp_fab.dart';
+import 'package:lakshya_mvp/widgets/shared/skeleton_loader.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
+import 'package:lakshya_mvp/config/app_config.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -16,42 +23,39 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final courseProvider = Provider.of<CourseProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
     final popularCourses = courseProvider.getPopularCourses();
+    final isLoading = courseProvider.isLoading;
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                borderRadius: AppSpacing.borderRadiusSm,
-              ),
-              child: const Text(
-                'L',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Text(
-              'Lakshya',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppColors.classicBlue,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ],
-        ),
+        title: const LakshyaLogo.appBar(),
         actions: [
+          // Theme toggle button
+          IconButton(
+            icon: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (child, animation) {
+                return RotationTransition(
+                  turns: animation,
+                  child: FadeTransition(opacity: animation, child: child),
+                );
+              },
+              child: Icon(
+                themeProvider.themeIcon,
+                key: ValueKey(themeProvider.themeMode),
+              ),
+            ),
+            tooltip: 'Theme: ${themeProvider.themeLabel}',
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              themeProvider.toggleTheme();
+            },
+          ),
+          // Notifications button
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {
-              // Show notifications
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('No new notifications'),
@@ -65,6 +69,7 @@ class HomeScreen extends StatelessWidget {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
+          HapticFeedback.mediumImpact();
           await Future.delayed(const Duration(seconds: 1));
         },
         child: SingleChildScrollView(
@@ -75,32 +80,45 @@ class HomeScreen extends StatelessWidget {
               // Hero Section
               const HeroSection(),
 
-              // Popular Courses Section
+              // Programs Section
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.screenPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Icon badge
+                        Container(
+                          padding: const EdgeInsets.all(AppSpacing.sm),
+                          decoration: BoxDecoration(
+                            color: AppColors.classicBlue.withValues(alpha: 0.1),
+                            borderRadius: AppSpacing.borderRadiusSm,
+                          ),
+                          child: const Icon(
+                            Icons.school_rounded,
+                            color: AppColors.classicBlue,
+                            size: AppSpacing.iconSm,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Popular Courses',
+                                'Our Programs',
                                 style: Theme.of(context)
                                     .textTheme
-                                    .headlineSmall
+                                    .titleLarge
                                     ?.copyWith(
                                       fontWeight: FontWeight.bold,
                                     ),
                               ),
                               const SizedBox(height: AppSpacing.xs),
                               Text(
-                                'Start your journey with our top programs',
+                                'Globally recognized qualifications',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
@@ -111,9 +129,11 @@ class HomeScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(width: AppSpacing.sm),
                         TextButton(
-                          onPressed: () => context.go('/courses'),
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            context.go('/courses');
+                          },
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                               horizontal: AppSpacing.md,
@@ -123,39 +143,43 @@ class HomeScreen extends StatelessWidget {
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('View All'),
+                              Text('See All'),
                               SizedBox(width: AppSpacing.xs),
-                              Icon(Icons.arrow_forward, size: 16),
+                              Icon(Icons.arrow_forward_rounded, size: 16),
                             ],
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.lg),
+                    // Course carousel with loading state
                     SizedBox(
                       height: 340,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: popularCourses.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: EdgeInsets.only(
-                              right: index < popularCourses.length - 1
-                                  ? AppSpacing.lg
-                                  : 0,
-                            ),
-                            child: CourseCard(
-                              course: popularCourses[index],
-                              onTap: () {
-                                courseProvider
-                                    .selectCourse(popularCourses[index]);
-                                context
-                                    .push('/course/${popularCourses[index].id}');
+                      child: isLoading
+                          ? _buildCourseSkeletons()
+                          : ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: popularCourses.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                    right: index < popularCourses.length - 1
+                                        ? AppSpacing.lg
+                                        : 0,
+                                  ),
+                                  child: CourseCard(
+                                    course: popularCourses[index],
+                                    onTap: () {
+                                      HapticFeedback.lightImpact();
+                                      courseProvider
+                                          .selectCourse(popularCourses[index]);
+                                      context.push(
+                                          '/course/${popularCourses[index].id}');
+                                    },
+                                  ),
+                                );
                               },
                             ),
-                          );
-                        },
-                      ),
                     ),
                   ],
                 ),
@@ -175,115 +199,29 @@ class HomeScreen extends StatelessWidget {
               // CTA Section
               const CtaSection(),
 
-              // Footer
-              _buildFooter(context),
+              // Footer - Using shared widget
+              const AppFooter(showSocialIcons: true),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildFooter(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.xxl),
-      decoration: const BoxDecoration(
-        gradient: AppColors.heroGradient,
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: AppSpacing.borderRadiusSm,
-                ),
-                child: const Text(
-                  'L',
-                  style: TextStyle(
-                    color: AppColors.classicBlue,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Text(
-                'Lakshya Institute',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Leading Institute for Commerce Professional Courses',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
-                ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.xxl),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _SocialIcon(
-                icon: Icons.language,
-                onTap: () {},
-              ),
-              _SocialIcon(
-                icon: Icons.email_outlined,
-                onTap: () => context.go('/contact'),
-              ),
-              _SocialIcon(
-                icon: Icons.phone_outlined,
-                onTap: () {},
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xxl),
-          const Divider(color: Colors.white24, height: 1),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            '© 2024 Lakshya Institute. All rights reserved.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white54,
-                ),
-          ),
-          // Add padding for bottom nav
-          const SizedBox(height: AppSpacing.lg),
-        ],
+      floatingActionButton: const WhatsAppFab(
+        phoneNumber: AppConfig.whatsAppNumber,
+        prefilledMessage: AppConfig.whatsAppDefaultMessage,
       ),
     );
   }
-}
 
-class _SocialIcon extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _SocialIcon({
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-      child: IconButton(
-        onPressed: onTap,
-        icon: Icon(icon, color: Colors.white),
-        style: IconButton.styleFrom(
-          backgroundColor: Colors.white.withValues(alpha: 0.1),
-          padding: const EdgeInsets.all(AppSpacing.md),
-        ),
-      ),
+  Widget _buildCourseSkeletons() {
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: 3,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: EdgeInsets.only(right: index < 2 ? AppSpacing.lg : 0),
+          child: const CourseCardSkeleton(),
+        );
+      },
     );
   }
 }

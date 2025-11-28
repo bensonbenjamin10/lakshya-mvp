@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
+import 'package:lakshya_mvp/widgets/lakshya_logo.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -16,65 +17,118 @@ class AboutScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppSpacing.xxl),
-              decoration: const BoxDecoration(
-                gradient: AppColors.heroGradient,
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: AppSpacing.borderRadiusMd,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
+            // Header - Clean but visually rich
+            Stack(
+              children: [
+                // Background gradient
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screenPadding,
+                    vertical: AppSpacing.xxxl,
+                  ),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white,
+                        AppColors.classicBlue10,
                       ],
                     ),
-                    child: const Text(
-                      'L',
-                      style: TextStyle(
-                        color: AppColors.classicBlue,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 40,
+                  ),
+                  child: Column(
+                    children: [
+                      // Brand logo - centered
+                      const LakshyaLogo(height: 56),
+                      const SizedBox(height: AppSpacing.md),
+                      // Subtitle
+                      Text(
+                        'Indian Institute of Commerce',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.classicBlue60,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.5,
+                            ),
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                      // Stats row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const _StatBadge(value: '10K+', label: 'Students'),
+                          const SizedBox(width: AppSpacing.md),
+                          Container(
+                            width: 1,
+                            height: 30,
+                            color: AppColors.classicBlue20,
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          const _StatBadge(value: '95%', label: 'Pass Rate'),
+                          const SizedBox(width: AppSpacing.md),
+                          Container(
+                            width: 1,
+                            height: 30,
+                            color: AppColors.classicBlue20,
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          const _StatBadge(value: '15+', label: 'Years'),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      // Tagline badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.sm,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.classicBlue.withValues(alpha: 0.08),
+                          borderRadius: AppSpacing.borderRadiusFull,
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.verified_rounded,
+                              size: 14,
+                              color: AppColors.mimosaGold,
+                            ),
+                            SizedBox(width: AppSpacing.xs),
+                            Text(
+                              'Excellence in Commerce Education',
+                              style: TextStyle(
+                                color: AppColors.classicBlue,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Golden accent (top-right, like splash)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: Alignment.topRight,
+                        radius: 1.0,
+                        colors: [
+                          AppColors.mimosaGold.withValues(alpha: 0.25),
+                          AppColors.mimosaGold.withValues(alpha: 0.0),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    'Lakshya Institute',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.sm,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: AppSpacing.borderRadiusFull,
-                    ),
-                    child: Text(
-                      'Excellence in Commerce Education',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
 
             Padding(
@@ -278,7 +332,7 @@ class _SectionCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: AppSpacing.borderRadiusMd,
-        side: BorderSide(color: AppColors.neutral200),
+        side: const BorderSide(color: AppColors.neutral200),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -343,7 +397,7 @@ class _ProgramItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       shape: RoundedRectangleBorder(
         borderRadius: AppSpacing.borderRadiusMd,
-        side: BorderSide(color: AppColors.neutral200),
+        side: const BorderSide(color: AppColors.neutral200),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
@@ -435,6 +489,41 @@ class _FeatureItem extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _StatBadge extends StatelessWidget {
+  final String value;
+  final String label;
+
+  const _StatBadge({
+    required this.value,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            color: AppColors.classicBlue,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            color: AppColors.classicBlue.withValues(alpha: 0.6),
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 }

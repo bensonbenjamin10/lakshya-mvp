@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:lakshya_mvp/providers/lead_provider.dart';
 import 'package:lakshya_mvp/models/lead.dart';
@@ -26,6 +27,12 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
   final _countryController = TextEditingController();
   final _messageController = TextEditingController();
   LeadSource _selectedSource = LeadSource.website;
+
+  // Real-time validation state
+  String? _nameError;
+  String? _emailError;
+  String? _phoneError;
+  bool _hasSubmitted = false;
 
   String get _dialogTitle {
     switch (widget.inquiryType) {
@@ -67,6 +74,15 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Add real-time validation listeners
+    _nameController.addListener(_validateName);
+    _emailController.addListener(_validateEmail);
+    _phoneController.addListener(_validatePhone);
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
@@ -76,11 +92,63 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
     super.dispose();
   }
 
+  void _validateName() {
+    if (!_hasSubmitted) return;
+    final value = _nameController.text;
+    setState(() {
+      if (value.trim().isEmpty) {
+        _nameError = 'Please enter your name';
+      } else if (value.trim().length < 2) {
+        _nameError = 'Name must be at least 2 characters';
+      } else {
+        _nameError = null;
+      }
+    });
+  }
+
+  void _validateEmail() {
+    if (!_hasSubmitted) return;
+    final value = _emailController.text;
+    setState(() {
+      if (value.trim().isEmpty) {
+        _emailError = 'Please enter your email';
+      } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+        _emailError = 'Please enter a valid email';
+      } else {
+        _emailError = null;
+      }
+    });
+  }
+
+  void _validatePhone() {
+    if (!_hasSubmitted) return;
+    final value = _phoneController.text;
+    setState(() {
+      if (value.trim().isEmpty) {
+        _phoneError = 'Please enter your phone number';
+      } else if (value.trim().length < 10) {
+        _phoneError = 'Please enter a valid phone number';
+      } else {
+        _phoneError = null;
+      }
+    });
+  }
+
+  bool _validateAll() {
+    _hasSubmitted = true;
+    _validateName();
+    _validateEmail();
+    _validatePhone();
+    return _nameError == null && _emailError == null && _phoneError == null;
+  }
+
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) {
+    if (!_validateAll()) {
+      HapticFeedback.heavyImpact();
       return;
     }
 
+    HapticFeedback.mediumImpact();
     final leadProvider = Provider.of<LeadProvider>(context, listen: false);
 
     final lead = Lead(
@@ -188,12 +256,8 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
                         hint: 'Enter your full name',
                         icon: Icons.person_outline_rounded,
                         isRequired: true,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your name';
-                          }
-                          return null;
-                        },
+                        errorText: _nameError,
+                        textInputAction: TextInputAction.next,
                       ),
                       const SizedBox(height: AppSpacing.lg),
 
@@ -205,16 +269,14 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
                         icon: Icons.email_outlined,
                         keyboardType: TextInputType.emailAddress,
                         isRequired: true,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your email';
-                          }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                              .hasMatch(value)) {
-                            return 'Please enter a valid email';
-                          }
-                          return null;
-                        },
+                        errorText: _emailError,
+                        textInputAction: TextInputAction.next,
+                        suffixIcon: _emailError == null &&
+                                _emailController.text.isNotEmpty &&
+                                _hasSubmitted
+                            ? const Icon(Icons.check_circle,
+                                color: AppColors.success, size: 20)
+                            : null,
                       ),
                       const SizedBox(height: AppSpacing.lg),
 
@@ -226,12 +288,11 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
                         icon: Icons.phone_outlined,
                         keyboardType: TextInputType.phone,
                         isRequired: true,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your phone number';
-                          }
-                          return null;
-                        },
+                        errorText: _phoneError,
+                        textInputAction: TextInputAction.next,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[\d\+\-\s]')),
+                        ],
                       ),
                       const SizedBox(height: AppSpacing.lg),
 
@@ -241,6 +302,7 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
                         label: 'Country',
                         hint: 'Enter your country',
                         icon: Icons.public_outlined,
+                        textInputAction: TextInputAction.next,
                       ),
                       const SizedBox(height: AppSpacing.lg),
 
@@ -255,6 +317,7 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
                         hint: 'Any additional information or questions...',
                         icon: Icons.chat_bubble_outline_rounded,
                         maxLines: 3,
+                        textInputAction: TextInputAction.done,
                       ),
                       const SizedBox(height: AppSpacing.xxl),
 
@@ -530,7 +593,7 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
   }
 }
 
-/// Reusable form field widget with consistent styling
+/// Reusable form field widget with real-time validation
 class _FormField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
@@ -539,7 +602,10 @@ class _FormField extends StatelessWidget {
   final TextInputType? keyboardType;
   final int maxLines;
   final bool isRequired;
-  final String? Function(String?)? validator;
+  final String? errorText;
+  final Widget? suffixIcon;
+  final TextInputAction? textInputAction;
+  final List<TextInputFormatter>? inputFormatters;
 
   const _FormField({
     required this.controller,
@@ -549,11 +615,16 @@ class _FormField extends StatelessWidget {
     this.keyboardType,
     this.maxLines = 1,
     this.isRequired = false,
-    this.validator,
+    this.errorText,
+    this.suffixIcon,
+    this.textInputAction,
+    this.inputFormatters,
   });
 
   @override
   Widget build(BuildContext context) {
+    final hasError = errorText != null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -563,7 +634,7 @@ class _FormField extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: AppColors.neutral700,
+                    color: hasError ? AppColors.error : AppColors.neutral700,
                   ),
             ),
             if (isRequired)
@@ -577,46 +648,99 @@ class _FormField extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         // Input
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          maxLines: maxLines,
-          style: Theme.of(context).textTheme.bodyLarge,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.neutral400,
-                ),
-            prefixIcon: Icon(icon, color: AppColors.neutral500),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: AppSpacing.borderRadiusSm,
-              borderSide: const BorderSide(color: AppColors.neutral300),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: AppSpacing.borderRadiusSm,
-              borderSide: const BorderSide(color: AppColors.neutral300),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: AppSpacing.borderRadiusSm,
-              borderSide:
-                  const BorderSide(color: AppColors.classicBlue, width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: AppSpacing.borderRadiusSm,
-              borderSide: const BorderSide(color: AppColors.error),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: AppSpacing.borderRadiusSm,
-              borderSide: const BorderSide(color: AppColors.error, width: 2),
-            ),
-            filled: true,
-            fillColor: AppColors.neutral50,
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            borderRadius: AppSpacing.borderRadiusSm,
+            boxShadow: hasError
+                ? [
+                    BoxShadow(
+                      color: AppColors.error.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
-          validator: validator,
+          child: TextFormField(
+            controller: controller,
+            keyboardType: keyboardType,
+            maxLines: maxLines,
+            textInputAction: textInputAction,
+            inputFormatters: inputFormatters,
+            style: Theme.of(context).textTheme.bodyLarge,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.neutral400,
+                  ),
+              prefixIcon: Icon(
+                icon,
+                color: hasError ? AppColors.error : AppColors.neutral500,
+              ),
+              suffixIcon: suffixIcon,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: AppSpacing.borderRadiusSm,
+                borderSide: BorderSide(
+                  color: hasError ? AppColors.error : AppColors.neutral300,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: AppSpacing.borderRadiusSm,
+                borderSide: BorderSide(
+                  color: hasError ? AppColors.error : AppColors.neutral300,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: AppSpacing.borderRadiusSm,
+                borderSide: BorderSide(
+                  color: hasError ? AppColors.error : AppColors.classicBlue,
+                  width: 2,
+                ),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: AppSpacing.borderRadiusSm,
+                borderSide: const BorderSide(color: AppColors.error),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: AppSpacing.borderRadiusSm,
+                borderSide: const BorderSide(color: AppColors.error, width: 2),
+              ),
+              filled: true,
+              fillColor: hasError
+                  ? AppColors.error.withValues(alpha: 0.05)
+                  : AppColors.neutral50,
+            ),
+          ),
+        ),
+        // Error message with animation
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          child: hasError
+              ? Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.xs),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 14,
+                        color: AppColors.error,
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text(
+                        errorText!,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.error,
+                            ),
+                      ),
+                    ],
+                  ),
+                )
+              : const SizedBox.shrink(),
         ),
       ],
     );

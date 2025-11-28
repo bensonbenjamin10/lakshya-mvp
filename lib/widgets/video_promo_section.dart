@@ -93,7 +93,7 @@ class VideoPromoSection extends StatelessWidget {
                       ),
                       const SizedBox(width: AppSpacing.md),
                       Text(
-                        'Watch & Learn',
+                        'See Inside Lakshya',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -104,7 +104,7 @@ class VideoPromoSection extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(left: 44),
                     child: Text(
-                      'Discover what makes Lakshya special',
+                      'Campus tours, faculty intros & more',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: AppColors.neutral500,
                           ),

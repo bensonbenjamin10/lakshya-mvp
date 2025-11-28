@@ -8,7 +8,7 @@ import 'package:lakshya_mvp/screens/contact_screen.dart';
 import 'package:lakshya_mvp/screens/about_screen.dart';
 import 'package:lakshya_mvp/widgets/app_shell.dart';
 
-/// App routing configuration using go_router with bottom navigation shell
+/// App routing configuration using go_router with custom transitions
 class AppRouter {
   static final GlobalKey<NavigatorState> _rootNavigatorKey =
       GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -17,11 +17,17 @@ class AppRouter {
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
     routes: [
-      // Splash Screen
+      // Splash Screen with fade transition
       GoRoute(
         path: '/splash',
         name: 'splash',
-        builder: (context, state) => const SplashScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const SplashScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
       ),
       // Main shell with bottom navigation
       StatefulShellRoute.indexedStack(
@@ -35,7 +41,11 @@ class AppRouter {
               GoRoute(
                 path: '/',
                 name: 'home',
-                builder: (context, state) => const HomeScreen(),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const HomeScreen(),
+                  transitionsBuilder: _fadeTransition,
+                ),
               ),
             ],
           ),
@@ -45,7 +55,11 @@ class AppRouter {
               GoRoute(
                 path: '/courses',
                 name: 'courses',
-                builder: (context, state) => const CoursesScreen(),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const CoursesScreen(),
+                  transitionsBuilder: _fadeTransition,
+                ),
               ),
             ],
           ),
@@ -55,7 +69,11 @@ class AppRouter {
               GoRoute(
                 path: '/about',
                 name: 'about',
-                builder: (context, state) => const AboutScreen(),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const AboutScreen(),
+                  transitionsBuilder: _fadeTransition,
+                ),
               ),
             ],
           ),
@@ -65,26 +83,100 @@ class AppRouter {
               GoRoute(
                 path: '/contact',
                 name: 'contact',
-                builder: (context, state) => const ContactScreen(),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const ContactScreen(),
+                  transitionsBuilder: _fadeTransition,
+                ),
               ),
             ],
           ),
         ],
       ),
-      // Course detail - outside shell (full screen with swipe-back support)
+      // Course detail - outside shell with slide transition
       GoRoute(
         path: '/course/:id',
         name: 'course-detail',
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) {
           final courseId = state.pathParameters['id']!;
-          // Use MaterialPage for proper swipe-back gesture support
-          return MaterialPage(
+          return CustomTransitionPage(
             key: state.pageKey,
             child: CourseDetailScreen(courseId: courseId),
+            transitionsBuilder: _slideUpTransition,
           );
         },
       ),
     ],
   );
+
+  /// Fade transition for tab navigation
+  static Widget _fadeTransition(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return FadeTransition(
+      opacity: CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOut,
+      ),
+      child: child,
+    );
+  }
+
+  /// Slide up transition for detail pages
+  static Widget _slideUpTransition(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final curvedAnimation = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutCubic,
+    );
+
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(0, 0.1),
+        end: Offset.zero,
+      ).animate(curvedAnimation),
+      child: FadeTransition(
+        opacity: curvedAnimation,
+        child: child,
+      ),
+    );
+  }
+
+}
+
+/// Custom page transition with configurable duration
+class AppPageTransition<T> extends CustomTransitionPage<T> {
+  AppPageTransition({
+    required super.child,
+    super.transitionDuration = const Duration(milliseconds: 300),
+    super.reverseTransitionDuration = const Duration(milliseconds: 250),
+    super.transitionsBuilder = _defaultTransition,
+    super.key,
+    super.name,
+    super.arguments,
+    super.restorationId,
+  });
+
+  static Widget _defaultTransition(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return FadeTransition(
+      opacity: CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOut,
+      ),
+      child: child,
+    );
+  }
 }
