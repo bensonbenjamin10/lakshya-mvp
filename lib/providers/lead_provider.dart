@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:lakshya_mvp/core/repositories/lead_repository.dart';
 import 'package:lakshya_mvp/models/lead.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Lead provider following Provider pattern and SOLID principles
 /// 
@@ -8,6 +9,7 @@ import 'package:lakshya_mvp/models/lead.dart';
 /// Dependency Inversion: depends on LeadRepository abstraction, not concrete implementation.
 class LeadProvider with ChangeNotifier {
   final LeadRepository _repository;
+  RealtimeChannel? _realtimeChannel;
 
   List<Lead> _leads = [];
   bool _isLoading = false;
@@ -16,6 +18,35 @@ class LeadProvider with ChangeNotifier {
 
   LeadProvider(this._repository) {
     _loadLeads();
+    _setupRealtimeSubscription();
+  }
+
+  /// Setup real-time subscription for leads (admin only)
+  void _setupRealtimeSubscription() {
+    try {
+      final client = Supabase.instance.client;
+      _realtimeChannel = client
+          .channel('leads_changes')
+          .onPostgresChanges(
+            event: PostgresChangeEvent.all,
+            schema: 'public',
+            table: 'leads',
+            callback: (payload) {
+              debugPrint('Realtime lead update: ${payload.eventType}');
+              // Reload leads when changes occur
+              _loadLeads();
+            },
+          )
+          .subscribe();
+    } catch (e) {
+      debugPrint('Error setting up realtime subscription: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _realtimeChannel?.unsubscribe();
+    super.dispose();
   }
 
   List<Lead> get leads => _leads;
@@ -93,6 +124,42 @@ class LeadProvider with ChangeNotifier {
     } catch (e) {
       debugPrint('Error fetching assigned leads: $e');
       return [];
+    }
+  }
+
+  /// Update lead status
+  Future<bool> updateLeadStatus(String leadId, LeadStatus newStatus) async {
+    try {
+      final lead = _leads.firstWhere((l) => l.id == leadId);
+      final updatedLead = Lead(
+        id: lead.id,
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        country: lead.country,
+        inquiryType: lead.inquiryType,
+        courseId: lead.courseId,
+        message: lead.message,
+        source: lead.source,
+        createdAt: lead.createdAt,
+        updatedAt: DateTime.now(),
+        status: newStatus,
+        assignedTo: lead.assignedTo,
+        notes: lead.notes,
+      );
+
+      await _repository.update(updatedLead);
+      final index = _leads.indexWhere((l) => l.id == leadId);
+      if (index != -1) {
+        _leads[index] = updatedLead;
+        notifyListeners();
+      }
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('Error updating lead status: $e');
+      notifyListeners();
+      return false;
     }
   }
 

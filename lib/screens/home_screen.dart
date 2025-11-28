@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:lakshya_mvp/providers/course_provider.dart';
 import 'package:lakshya_mvp/providers/theme_provider.dart';
+import 'package:lakshya_mvp/providers/auth_provider.dart';
 import 'package:lakshya_mvp/widgets/course_card.dart';
 import 'package:lakshya_mvp/widgets/hero_section.dart';
 import 'package:lakshya_mvp/widgets/features_section.dart';
@@ -24,6 +26,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final courseProvider = Provider.of<CourseProvider>(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context);
     final popularCourses = courseProvider.getPopularCourses();
     final isLoading = courseProvider.isLoading;
 
@@ -31,6 +34,16 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const LakshyaLogo.appBar(),
         actions: [
+          // Admin access button (visible when authenticated and on web only)
+          if (authProvider.isAuthenticated && kIsWeb)
+            IconButton(
+              icon: const Icon(Icons.admin_panel_settings_outlined),
+              tooltip: 'Admin Dashboard',
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                context.go('/admin');
+              },
+            ),
           // Theme toggle button
           IconButton(
             icon: AnimatedSwitcher(

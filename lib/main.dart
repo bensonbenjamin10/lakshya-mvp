@@ -4,9 +4,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lakshya_mvp/config/supabase_config.dart';
 import 'package:lakshya_mvp/core/repositories/lead_repository.dart';
 import 'package:lakshya_mvp/core/repositories/course_repository.dart';
+import 'package:lakshya_mvp/core/repositories/video_promo_repository.dart';
 import 'package:lakshya_mvp/services/auth_service.dart';
+import 'package:lakshya_mvp/services/storage_service.dart';
 import 'package:lakshya_mvp/providers/lead_provider.dart';
 import 'package:lakshya_mvp/providers/course_provider.dart';
+import 'package:lakshya_mvp/providers/video_promo_provider.dart';
 import 'package:lakshya_mvp/providers/auth_provider.dart';
 import 'package:lakshya_mvp/providers/theme_provider.dart';
 import 'package:lakshya_mvp/providers/favorites_provider.dart';
@@ -45,10 +48,16 @@ class LakshyaApp extends StatelessWidget {
         Provider<LeadRepository>(
           create: (ctx) => LeadRepository(ctx.read<SupabaseClient>()),
         ),
+        Provider<VideoPromoRepository>(
+          create: (ctx) => VideoPromoRepository(ctx.read<SupabaseClient>()),
+        ),
         
         // Services (depend on Supabase client)
         Provider<AuthService>(
           create: (ctx) => AuthService(ctx.read<SupabaseClient>()),
+        ),
+        Provider<StorageService>(
+          create: (ctx) => StorageService(ctx.read<SupabaseClient>()),
         ),
         
         // Providers (depend on services/repositories)
@@ -60,6 +69,9 @@ class LakshyaApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<LeadProvider>(
           create: (ctx) => LeadProvider(ctx.read<LeadRepository>()),
+        ),
+        ChangeNotifierProvider<VideoPromoProvider>(
+          create: (ctx) => VideoPromoProvider(ctx.read<VideoPromoRepository>()),
         ),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),

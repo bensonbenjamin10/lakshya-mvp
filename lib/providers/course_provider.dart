@@ -93,6 +93,75 @@ class CourseProvider with ChangeNotifier {
     }
   }
 
+  /// Create a new course
+  Future<bool> create(Course course) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final createdCourse = await _repository.create(course);
+      _courses.add(createdCourse);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      debugPrint('Error creating course: $e');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Update an existing course
+  Future<bool> update(Course course) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final updatedCourse = await _repository.update(course);
+      final index = _courses.indexWhere((c) => c.id == course.id);
+      if (index != -1) {
+        _courses[index] = updatedCourse;
+      }
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      debugPrint('Error updating course: $e');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Delete a course
+  Future<bool> delete(String courseId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _repository.delete(courseId);
+      _courses.removeWhere((c) => c.id == courseId);
+      if (_selectedCourse?.id == courseId) {
+        _selectedCourse = null;
+      }
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      debugPrint('Error deleting course: $e');
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Clear error
   void clearError() {
     _error = null;

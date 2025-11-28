@@ -48,9 +48,13 @@ class CourseRepository implements BaseRepository<Course> {
   @override
   Future<Course> create(Course entity) async {
     try {
+      // Remove id from JSON for new courses (let database generate UUID)
+      final json = entity.toJson();
+      json.remove('id');
+      
       final response = await _client
           .from('courses')
-          .insert(entity.toJson())
+          .insert(json)
           .select()
           .single();
 

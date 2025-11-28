@@ -9,6 +9,7 @@ enum CourseCategory {
 
 class Course extends BaseModel {
   final String id;
+  final String slug;
   final String title;
   final String description;
   final CourseCategory category;
@@ -22,6 +23,7 @@ class Course extends BaseModel {
 
   Course({
     required this.id,
+    required this.slug,
     required this.title,
     required this.description,
     required this.category,
@@ -79,9 +81,8 @@ class Course extends BaseModel {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'slug': id, // Using id as slug for now
+    final json = <String, dynamic>{
+      'slug': slug,
       'title': title,
       'description': description,
       'category': categoryString,
@@ -89,16 +90,28 @@ class Course extends BaseModel {
       'level': level,
       'highlights': highlights,
       'image_url': imageUrl,
-      'brochure_url': brochureUrl,
       'is_popular': isPopular,
       'is_active': true,
     };
+
+    // Only include id if it's not empty (for updates)
+    if (id.isNotEmpty) {
+      json['id'] = id;
+    }
+
+    // Include optional fields
+    if (brochureUrl != null) {
+      json['brochure_url'] = brochureUrl;
+    }
+
+    return json;
   }
 
   /// Create Course from JSON (Supabase format)
   factory Course.fromJson(Map<String, dynamic> json) {
     return Course(
       id: json['id'] as String,
+      slug: json['slug'] as String? ?? json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String? ?? '',
       category: categoryFromString(json['category'] as String),
