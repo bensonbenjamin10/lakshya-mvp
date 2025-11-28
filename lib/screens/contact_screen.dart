@@ -6,6 +6,7 @@ import 'package:lakshya_mvp/widgets/lead_form_dialog.dart';
 import 'package:lakshya_mvp/widgets/shared/whatsapp_fab.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
 import 'package:lakshya_mvp/config/app_config.dart';
+import 'package:lakshya_mvp/services/analytics_service.dart';
 
 class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});
@@ -287,6 +288,8 @@ class ContactScreen extends StatelessWidget {
         child: InkWell(
           onTap: () async {
             HapticFeedback.mediumImpact();
+            // Track WhatsApp click
+            AnalyticsService.logWhatsAppClick(sourceLocation: 'contact_screen_whatsapp_section');
             final url = 'https://wa.me/${AppConfig.whatsAppNumber}?text=${Uri.encodeComponent(AppConfig.whatsAppContactMessage)}';
             final uri = Uri.parse(url);
             if (await canLaunchUrl(uri)) {

@@ -49,3 +49,8 @@ app.*.map.json
 /web/*.js.deps
 /web/*.js.deps.json
 
+# Firebase
+# Note: firebase.json and .firebaserc can be committed (project ID is not sensitive)
+# But if you have local Firebase config files with sensitive keys, add them here
+# /web/firebase-config.js (if it contains actual keys - currently it's a template)
+

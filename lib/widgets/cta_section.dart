@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/colors.dart';
 import '../theme/spacing.dart';
+import '../services/analytics_service.dart';
 
 class CtaSection extends StatelessWidget {
   const CtaSection({super.key});
@@ -100,7 +101,10 @@ class CtaSection extends StatelessWidget {
                       width: double.infinity,
                       height: AppSpacing.buttonHeightLg,
                       child: ElevatedButton.icon(
-                        onPressed: () => context.go('/contact'),
+                        onPressed: () {
+                          AnalyticsService.logCtaClick(ctaLocation: 'cta_section_book_counseling');
+                          context.go('/contact');
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.mimosaGold,
                           foregroundColor: AppColors.neutral900,
@@ -121,7 +125,10 @@ class CtaSection extends StatelessWidget {
                       width: double.infinity,
                       height: AppSpacing.buttonHeightLg,
                       child: OutlinedButton.icon(
-                        onPressed: () => context.go('/courses'),
+                        onPressed: () {
+                          AnalyticsService.logCtaClick(ctaLocation: 'cta_section_view_programs');
+                          context.go('/courses');
+                        },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.white,
                           side: const BorderSide(color: Colors.white, width: 2),
@@ -145,7 +152,10 @@ class CtaSection extends StatelessWidget {
                     SizedBox(
                       height: AppSpacing.buttonHeightLg,
                       child: ElevatedButton.icon(
-                        onPressed: () => context.go('/contact'),
+                        onPressed: () {
+                          AnalyticsService.logCtaClick(ctaLocation: 'cta_section_book_counseling');
+                          context.go('/contact');
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.mimosaGold,
                           foregroundColor: AppColors.neutral900,
@@ -168,7 +178,10 @@ class CtaSection extends StatelessWidget {
                     SizedBox(
                       height: AppSpacing.buttonHeightLg,
                       child: OutlinedButton.icon(
-                        onPressed: () => context.go('/courses'),
+                        onPressed: () {
+                          AnalyticsService.logCtaClick(ctaLocation: 'cta_section_view_programs');
+                          context.go('/courses');
+                        },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.white,
                           side: const BorderSide(color: Colors.white, width: 2),

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:lakshya_mvp/config/supabase_config.dart';
 import 'package:lakshya_mvp/core/repositories/lead_repository.dart';
 import 'package:lakshya_mvp/core/repositories/course_repository.dart';
 import 'package:lakshya_mvp/core/repositories/video_promo_repository.dart';
 import 'package:lakshya_mvp/services/auth_service.dart';
 import 'package:lakshya_mvp/services/storage_service.dart';
+import 'package:lakshya_mvp/services/analytics_service.dart';
 import 'package:lakshya_mvp/providers/lead_provider.dart';
 import 'package:lakshya_mvp/providers/course_provider.dart';
 import 'package:lakshya_mvp/providers/video_promo_provider.dart';
@@ -18,6 +20,18 @@ import 'package:lakshya_mvp/theme/theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase (must be before Supabase)
+  // For web, Firebase will use default app if configured via Firebase Console
+  // For mobile, platform-specific configuration files are needed
+  try {
+    await Firebase.initializeApp();
+    await AnalyticsService.initialize();
+  } catch (e) {
+    debugPrint('Firebase initialization error: $e');
+    debugPrint('Continuing without Firebase Analytics...');
+    // Continue without Firebase if initialization fails (e.g., not configured yet)
+  }
   
   // Initialize Supabase
   await Supabase.initialize(

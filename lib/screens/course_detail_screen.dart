@@ -8,8 +8,9 @@ import 'package:lakshya_mvp/models/course.dart';
 import 'package:lakshya_mvp/widgets/lead_form_dialog.dart';
 import 'package:lakshya_mvp/widgets/vimeo_player.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
+import 'package:lakshya_mvp/services/analytics_service.dart';
 
-class CourseDetailScreen extends StatelessWidget {
+class CourseDetailScreen extends StatefulWidget {
   final String courseId;
 
   const CourseDetailScreen({
@@ -18,13 +19,38 @@ class CourseDetailScreen extends StatelessWidget {
   });
 
   @override
+  State<CourseDetailScreen> createState() => _CourseDetailScreenState();
+}
+
+class _CourseDetailScreenState extends State<CourseDetailScreen> {
+  bool _hasTrackedView = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Track course view once when screen is displayed
+    if (!_hasTrackedView) {
+      final courseProvider = Provider.of<CourseProvider>(context);
+      final course = courseProvider.courses.firstWhere(
+        (c) => c.id == widget.courseId,
+        orElse: () => courseProvider.courses.first,
+      );
+      AnalyticsService.logCourseView(
+        courseId: course.id,
+        courseName: course.title,
+      );
+      _hasTrackedView = true;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final courseProvider = Provider.of<CourseProvider>(context);
     final course = courseProvider.courses.firstWhere(
-      (c) => c.id == courseId,
+      (c) => c.id == widget.courseId,
       orElse: () => courseProvider.courses.first,
     );
-    final courseColor = _getCourseColor(course.category);
+    final courseColor = _CourseDetailScreenState._getCourseColor(course.category);
 
     return PopScope(
       canPop: true,
@@ -104,7 +130,7 @@ class CourseDetailScreen extends StatelessWidget {
                             borderRadius: AppSpacing.borderRadiusLg,
                           ),
                           child: Icon(
-                            _getCourseIcon(course.category),
+                            _CourseDetailScreenState._getCourseIcon(course.category),
                             size: AppSpacing.iconHuge,
                             color: Colors.white,
                           ),
@@ -378,7 +404,7 @@ class CourseDetailScreen extends StatelessWidget {
     );
   }
 
-  Color _getCourseColor(CourseCategory category) {
+  static Color _getCourseColor(CourseCategory category) {
     switch (category) {
       case CourseCategory.acca:
         return AppColors.classicBlue;
@@ -391,7 +417,7 @@ class CourseDetailScreen extends StatelessWidget {
     }
   }
 
-  IconData _getCourseIcon(CourseCategory category) {
+  static IconData _getCourseIcon(CourseCategory category) {
     switch (category) {
       case CourseCategory.acca:
         return Icons.account_balance_rounded;

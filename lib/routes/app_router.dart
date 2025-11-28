@@ -14,6 +14,7 @@ import 'package:lakshya_mvp/screens/admin/lead_detail.dart';
 import 'package:lakshya_mvp/screens/admin/courses_management.dart';
 import 'package:lakshya_mvp/screens/admin/videos_management.dart';
 import 'package:lakshya_mvp/widgets/app_shell.dart';
+import 'package:lakshya_mvp/services/analytics_service.dart';
 
 /// App routing configuration using go_router with custom transitions
 class AppRouter {
@@ -23,6 +24,12 @@ class AppRouter {
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
+    observers: [
+      if (AnalyticsService.observer != null) AnalyticsService.observer!,
+    ],
+    onException: (context, state, exception) {
+      debugPrint('GoRouter exception: $exception');
+    },
     routes: [
       // Splash Screen with fade transition
       GoRoute(

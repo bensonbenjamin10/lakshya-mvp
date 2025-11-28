@@ -115,10 +115,90 @@ lib/
 - Web manifest for installability
 - Responsive design for all devices
 
+## Firebase Setup and Deployment
+
+### Prerequisites
+
+1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com)
+2. Enable Firebase Hosting in the Firebase Console
+3. Enable Firebase Analytics in the Firebase Console
+4. Install Firebase CLI:
+   ```bash
+   npm install -g firebase-tools
+   ```
+5. Login to Firebase:
+   ```bash
+   firebase login
+   ```
+
+### Configuration
+
+1. **Get Firebase Web App Configuration**:
+   - Go to Firebase Console > Project Settings > General
+   - Scroll to "Your apps" section and click on the Web app icon (`</>`)
+   - Copy the Firebase configuration values
+
+2. **Update Firebase Configuration**:
+   - Update `.firebaserc` with your Firebase project ID:
+     ```json
+     {
+       "projects": {
+         "default": "your-actual-firebase-project-id"
+       }
+     }
+     ```
+   - For production builds, set Firebase environment variables or update `lib/config/firebase_config.dart` with your Firebase config values
+
+3. **Build and Deploy**:
+   
+   **Windows (PowerShell)**:
+   ```powershell
+   .\scripts\deploy.ps1
+   ```
+   
+   **Linux/Mac (Bash)**:
+   ```bash
+   chmod +x scripts/deploy.sh
+   ./scripts/deploy.sh
+   ```
+   
+   **Manual Deployment**:
+   ```bash
+   # Build Flutter web app
+   flutter build web --release
+   
+   # Deploy to Firebase Hosting
+   firebase deploy --only hosting
+   ```
+
+### Firebase Analytics Events
+
+The app tracks the following analytics events:
+
+- **Page Views**: Automatic tracking via route changes
+- **lead_submission**: When a lead form is submitted
+  - Parameters: `course_id`, `source`, `inquiry_type`, `country`
+- **course_view**: When a course detail page is viewed
+  - Parameters: `course_id`, `course_name`
+- **cta_click**: When a CTA button is clicked
+  - Parameters: `cta_location`, `course_id` (if applicable)
+- **video_play**: When a promo video is played
+  - Parameters: `video_id`, `video_title`
+- **whatsapp_click**: When WhatsApp link is clicked
+  - Parameters: `source_location`
+
+### Custom Domain
+
+After deployment, you can configure a custom domain in Firebase Console:
+1. Go to Firebase Console > Hosting
+2. Click "Add custom domain"
+3. Follow the instructions to verify domain ownership
+4. Firebase will automatically provision SSL certificates
+
 ## Next Steps for Production
 
-1. **Backend Integration**: Connect lead forms to your CRM/backend API
-2. **Analytics**: Add analytics tracking (Google Analytics, Firebase Analytics)
+1. ✅ **Analytics**: Firebase Analytics integrated
+2. **Backend Integration**: Connect lead forms to your CRM/backend API (Supabase already integrated)
 3. **Payment Integration**: Add payment gateway for enrollment
 4. **User Authentication**: Add student portal/login functionality
 5. **Content Management**: Integrate CMS for dynamic content
@@ -131,7 +211,8 @@ lib/
 - **Flutter**: Cross-platform framework
 - **GoRouter**: Navigation and routing
 - **Provider**: State management
-- **SharedPreferences**: Local storage
+- **Supabase**: Backend and database
+- **Firebase**: Hosting and Analytics
 - **Material Design 3**: UI components
 
 ## License

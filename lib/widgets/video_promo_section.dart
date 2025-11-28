@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
 import 'package:lakshya_mvp/widgets/vimeo_player.dart';
+import 'package:lakshya_mvp/services/analytics_service.dart';
 
 /// Video data model for promos
 class VideoPromo {
@@ -314,6 +315,12 @@ class _FeaturedVideoCard extends StatelessWidget {
   }
 
   void _openVideo(BuildContext context) {
+    // Track video play event
+    AnalyticsService.logVideoPlay(
+      videoId: video.vimeoId,
+      videoTitle: video.title,
+    );
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -469,6 +476,12 @@ class _SmallVideoCard extends StatelessWidget {
   }
 
   void _openVideo(BuildContext context) {
+    // Track video play event
+    AnalyticsService.logVideoPlay(
+      videoId: video.vimeoId,
+      videoTitle: video.title,
+    );
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

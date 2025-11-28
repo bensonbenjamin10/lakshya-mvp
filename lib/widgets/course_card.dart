@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lakshya_mvp/models/course.dart';
+import 'package:lakshya_mvp/services/analytics_service.dart';
 
 class CourseCard extends StatelessWidget {
   final Course course;
@@ -11,10 +12,19 @@ class CourseCard extends StatelessWidget {
     required this.onTap,
   });
 
+  void _handleTap() {
+    // Track course card click
+    AnalyticsService.logCourseView(
+      courseId: course.id,
+      courseName: course.title,
+    );
+    onTap();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: _handleTap,
       child: Card(
         elevation: 3,
         clipBehavior: Clip.antiAlias,

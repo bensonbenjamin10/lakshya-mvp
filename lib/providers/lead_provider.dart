@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:lakshya_mvp/core/repositories/lead_repository.dart';
 import 'package:lakshya_mvp/models/lead.dart';
+import 'package:lakshya_mvp/services/analytics_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Lead provider following Provider pattern and SOLID principles
@@ -82,6 +83,15 @@ class LeadProvider with ChangeNotifier {
       _leads.add(createdLead);
       _isSubmitting = false;
       notifyListeners();
+      
+      // Track lead submission in analytics
+      AnalyticsService.logLeadSubmission(
+        courseId: lead.courseId,
+        source: lead.sourceString,
+        inquiryType: lead.inquiryTypeString,
+        country: lead.country,
+      );
+      
       return true;
     } catch (e) {
       _error = e.toString();

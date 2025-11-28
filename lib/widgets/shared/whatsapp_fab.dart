@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
+import 'package:lakshya_mvp/services/analytics_service.dart';
 
 /// WhatsApp floating action button for quick contact
 class WhatsAppFab extends StatefulWidget {
@@ -54,6 +55,10 @@ class _WhatsAppFabState extends State<WhatsAppFab>
   Future<void> _openWhatsApp() async {
     // Haptic feedback
     HapticFeedback.mediumImpact();
+
+    // Track WhatsApp click
+    final sourceLocation = widget.heroTag ?? 'whatsapp_fab';
+    AnalyticsService.logWhatsAppClick(sourceLocation: sourceLocation);
 
     String url = 'https://wa.me/${widget.phoneNumber}';
     if (widget.prefilledMessage != null) {
@@ -158,6 +163,9 @@ class WhatsAppButton extends StatelessWidget {
 
   Future<void> _openWhatsApp(BuildContext context) async {
     HapticFeedback.mediumImpact();
+
+    // Track WhatsApp click
+    AnalyticsService.logWhatsAppClick(sourceLocation: 'whatsapp_button_${label.toLowerCase().replaceAll(' ', '_')}');
 
     String url = 'https://wa.me/$phoneNumber';
     if (prefilledMessage != null) {
