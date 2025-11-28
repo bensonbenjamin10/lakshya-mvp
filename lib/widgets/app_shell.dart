@@ -13,11 +13,20 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: _BottomNavBar(
-        currentIndex: navigationShell.currentIndex,
-        onTap: (index) => _onTap(context, index),
+    return PopScope(
+      canPop: false, // Prevent back gesture from exiting the app
+      onPopInvokedWithResult: (didPop, result) {
+        // If not on home tab, navigate back to home
+        if (navigationShell.currentIndex != 0) {
+          navigationShell.goBranch(0);
+        }
+      },
+      child: Scaffold(
+        body: navigationShell,
+        bottomNavigationBar: _BottomNavBar(
+          currentIndex: navigationShell.currentIndex,
+          onTap: (index) => _onTap(context, index),
+        ),
       ),
     );
   }
