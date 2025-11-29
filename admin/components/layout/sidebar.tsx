@@ -10,6 +10,9 @@ import {
   Video,
   BarChart3,
   LogOut,
+  FileText,
+  GraduationCap,
+  TrendingUp,
 } from 'lucide-react'
 import { useLogout } from '@refinedev/core'
 
@@ -17,6 +20,9 @@ const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Leads', href: '/leads', icon: Users },
   { name: 'Courses', href: '/courses', icon: BookOpen },
+  { name: 'Modules', href: '/modules', icon: FileText },
+  { name: 'Enrollments', href: '/enrollments', icon: GraduationCap },
+  { name: 'Progress', href: '/progress', icon: TrendingUp },
   { name: 'Videos', href: '/videos', icon: Video },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
 ]

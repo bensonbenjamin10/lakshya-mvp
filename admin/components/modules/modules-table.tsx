@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { useList } from '@refinedev/core'
+import { useList, useNavigation } from '@refinedev/core'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { createClient } from '@/lib/supabase/client'
+import { useEffect, useState, useMemo } from 'react'
 import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { EmptyState } from '@/components/ui/empty-state'
 import { SearchInput } from '@/components/ui/search-input'
@@ -12,35 +13,53 @@ import { exportToCSV, exportToExcel } from '@/lib/utils/export'
 import { Download, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
 
-type SortField = 'title' | 'type' | 'created_at' | null
+type SortField = 'module_number' | 'title' | 'type' | null
 type SortOrder = 'asc' | 'desc'
 
-export function VideosTable() {
+export function ModulesTable() {
   const toast = useToast()
+  const [courses, setCourses] = useState<Record<string, string>>({})
   const [searchQuery, setSearchQuery] = useState('')
-  const [sortField, setSortField] = useState<SortField>('title')
+  const [sortField, setSortField] = useState<SortField>('module_number')
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
+  const supabase = createClient()
+
+  useEffect(() => {
+    // Load courses for display
+    supabase
+      .from('courses')
+      .select('id, title')
+      .then(({ data }) => {
+        if (data) {
+          const courseMap: Record<string, string> = {}
+          data.forEach((course) => {
+            courseMap[course.id] = course.title
+          })
+          setCourses(courseMap)
+        }
+      })
+  }, [])
 
   const listResult = useList({
-    resource: 'video_promos',
-    sorters: [{ field: 'display_order', order: 'asc' }],
+    resource: 'course_modules',
+    sorters: [{ field: 'display_order', order: 'asc' }, { field: 'module_number', order: 'asc' }],
   })
 
-  const allVideos = (listResult.result?.data || []) as any[]
+  const allModules = (listResult.result?.data || []) as any[]
   const isLoading = listResult.query?.isLoading || false
 
-  const videos = useMemo(() => {
-    let filtered = allVideos
+  const modules = useMemo(() => {
+    let filtered = allModules
 
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
       filtered = filtered.filter(
-        (video) =>
-          video.title?.toLowerCase().includes(query) ||
-          video.subtitle?.toLowerCase().includes(query) ||
-          video.type?.toLowerCase().includes(query) ||
-          video.vimeo_id?.toLowerCase().includes(query)
+        (module) =>
+          module.title?.toLowerCase().includes(query) ||
+          module.type?.toLowerCase().includes(query) ||
+          module.description?.toLowerCase().includes(query) ||
+          courses[module.course_id]?.toLowerCase().includes(query)
       )
     }
 
@@ -50,9 +69,9 @@ export function VideosTable() {
         let aVal = a[sortField]
         let bVal = b[sortField]
 
-        if (sortField === 'created_at') {
-          aVal = new Date(aVal || 0).getTime()
-          bVal = new Date(bVal || 0).getTime()
+        if (sortField === 'module_number') {
+          aVal = Number(aVal) || 0
+          bVal = Number(bVal) || 0
         } else {
           aVal = String(aVal || '').toLowerCase()
           bVal = String(bVal || '').toLowerCase()
@@ -67,7 +86,7 @@ export function VideosTable() {
     }
 
     return filtered
-  }, [allVideos, searchQuery, sortField, sortOrder])
+  }, [allModules, searchQuery, courses, sortField, sortOrder])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -91,37 +110,53 @@ export function VideosTable() {
 
   const handleExport = async (format: 'csv' | 'excel') => {
     try {
-      const exportData = videos.map((video) => ({
-        Title: video.title,
-        Subtitle: video.subtitle || 'N/A',
-        'Vimeo ID': video.vimeo_id,
-        Type: video.type,
-        Duration: video.duration || 'N/A',
-        Status: video.is_active ? 'Active' : 'Inactive',
-        Featured: video.is_featured ? 'Yes' : 'No',
+      const exportData = modules.map((module) => ({
+        'Module #': module.module_number,
+        Title: module.title,
+        Course: courses[module.course_id] || 'Unknown',
+        Type: module.type,
+        Duration: module.duration_minutes ? `${module.duration_minutes} min` : 'N/A',
+        Required: module.is_required ? 'Yes' : 'No',
       }))
 
       if (format === 'csv') {
-        exportToCSV(exportData, 'videos')
-        toast.success('Videos exported to CSV')
+        exportToCSV(exportData, 'modules')
+        toast.success('Modules exported to CSV')
       } else {
-        await exportToExcel(exportData, 'videos', 'Videos')
-        toast.success('Videos exported to Excel')
+        await exportToExcel(exportData, 'modules', 'Modules')
+        toast.success('Modules exported to Excel')
       }
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to export videos')
+      toast.error(error?.message || 'Failed to export modules')
+    }
+  }
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'video':
+        return 'bg-blue-100 text-blue-800'
+      case 'reading':
+        return 'bg-green-100 text-green-800'
+      case 'assignment':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'quiz':
+        return 'bg-purple-100 text-purple-800'
+      case 'live_session':
+        return 'bg-indigo-100 text-indigo-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
   if (isLoading) {
-    return <TableSkeleton rows={5} columns={5} />
+    return <TableSkeleton rows={5} columns={7} />
   }
 
-  if (videos.length === 0) {
+  if (modules.length === 0) {
     return (
       <EmptyState
-        title="No videos found"
-        description="Create your first video promo to get started."
+        title="No modules found"
+        description="Create your first course module to get started."
       />
     )
   }
@@ -131,7 +166,7 @@ export function VideosTable() {
       <CardContent className="p-4">
         <div className="mb-4 flex items-center justify-between gap-4">
           <SearchInput
-            placeholder="Search videos by title, subtitle, type, or Vimeo ID..."
+            placeholder="Search modules by title, type, or course..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-md"
@@ -141,7 +176,7 @@ export function VideosTable() {
               variant="outline"
               size="sm"
               onClick={() => handleExport('csv')}
-              disabled={videos.length === 0}
+              disabled={modules.length === 0}
             >
               <Download className="h-4 w-4 mr-2" />
               Export CSV
@@ -150,7 +185,7 @@ export function VideosTable() {
               variant="outline"
               size="sm"
               onClick={() => handleExport('excel')}
-              disabled={videos.length === 0}
+              disabled={modules.length === 0}
             >
               <Download className="h-4 w-4 mr-2" />
               Export Excel
@@ -165,6 +200,15 @@ export function VideosTable() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   <button
+                    onClick={() => handleSort('module_number')}
+                    className="flex items-center hover:text-gray-700"
+                  >
+                    Module #
+                    <SortIcon field="module_number" />
+                  </button>
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <button
                     onClick={() => handleSort('title')}
                     className="flex items-center hover:text-gray-700"
                   >
@@ -173,7 +217,7 @@ export function VideosTable() {
                   </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Vimeo ID
+                  Course
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   <button
@@ -185,7 +229,10 @@ export function VideosTable() {
                   </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  Duration
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Required
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -193,35 +240,42 @@ export function VideosTable() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {videos.map((video: any) => (
-                <tr key={video.id} className="hover:bg-gray-50">
+              {modules.map((module: any) => (
+                <tr key={module.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {video.title}
+                    {module.module_number}
+                  </td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                    {module.title}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {video.vimeo_id}
+                    {courses[module.course_id] || 'Unknown Course'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(
+                        module.type
+                      )}`}
+                    >
+                      {module.type.replace('_', ' ').toUpperCase()}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {video.type}
+                    {module.duration_minutes ? `${module.duration_minutes} min` : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        video.is_active
+                        module.is_required
                           ? 'bg-green-100 text-green-800'
                           : 'bg-gray-100 text-gray-800'
                       }`}
                     >
-                      {video.is_active ? 'Active' : 'Inactive'}
+                      {module.is_required ? 'Required' : 'Optional'}
                     </span>
-                    {video.is_featured && (
-                      <span className="ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                        Featured
-                      </span>
-                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <Link href={`/videos/${video.id}`}>
+                    <Link href={`/modules/${module.id}`}>
                       <Button variant="ghost" size="sm">
                         Edit
                       </Button>

@@ -4,12 +4,23 @@ import { useState, useEffect } from 'react'
 import { useForm } from '@refinedev/react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
+import { ImageUpload } from '@/components/ui/image-upload'
+import { useToast } from '@/lib/hooks/use-toast'
+import { useAutoSave } from '@/lib/hooks/use-auto-save'
+import { useRouter } from 'next/navigation'
+import { Save } from 'lucide-react'
 
 interface CourseFormProps {
   courseId?: string
 }
 
 export function CourseForm({ courseId }: CourseFormProps) {
+  const toast = useToast()
+  const router = useRouter()
+  const [draftSaved, setDraftSaved] = useState(false)
   const {
     refineCore: { onFinish, formLoading },
     register,
@@ -25,49 +36,102 @@ export function CourseForm({ courseId }: CourseFormProps) {
     },
   })
 
+  const formData = watch()
   const category = watch('category')
   const isPopular = watch('is_popular')
   const isActive = watch('is_active')
 
-  const onSubmit = (data: any) => {
-    onFinish({
-      ...data,
-      is_popular: isPopular || false,
-      is_active: isActive !== undefined ? isActive : true,
-    })
+  // Auto-save draft (only for new courses)
+  const { clearDraft, loadDraft } = useAutoSave({
+    data: formData,
+    key: `course_${courseId || 'new'}`,
+    enabled: !courseId, // Only auto-save for new courses
+  })
+
+  // Load draft on mount
+  useEffect(() => {
+    if (!courseId) {
+      const draft = loadDraft()
+      if (draft) {
+        Object.keys(draft).forEach((key) => {
+          if (draft[key] !== undefined) {
+            setValue(key as any, draft[key])
+          }
+        })
+        setDraftSaved(true)
+      }
+    }
+  }, [courseId, loadDraft, setValue])
+
+  // Show draft saved indicator
+  useEffect(() => {
+    if (!courseId && Object.keys(formData).length > 0) {
+      const timer = setTimeout(() => setDraftSaved(true), 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [formData, courseId])
+
+  const onSubmit = async (data: any) => {
+    try {
+      await onFinish({
+        ...data,
+        is_popular: isPopular || false,
+        is_active: isActive !== undefined ? isActive : true,
+      })
+      // Clear draft on successful save
+      if (!courseId) {
+        clearDraft()
+      }
+      toast.success(courseId ? 'Course updated successfully' : 'Course created successfully')
+      router.push('/courses')
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to save course')
+    }
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{courseId ? 'Edit Course' : 'Create Course'}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>{courseId ? 'Edit Course' : 'Create Course'}</CardTitle>
+          {!courseId && draftSaved && (
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Save className="h-4 w-4" />
+              <span>Draft saved</span>
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Title *
             </label>
-            <input
-              {...register('title', { required: true })}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+            <Input
+              {...register('title', { required: 'Title is required' })}
+              error={!!errors.title}
+              helperText={errors.title?.message as string}
+              placeholder="Enter course title"
             />
-            {errors.title && (
-              <p className="mt-1 text-sm text-red-600">Title is required</p>
-            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Slug *
             </label>
-            <input
-              {...register('slug', { required: true })}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+            <Input
+              {...register('slug', {
+                required: 'Slug is required',
+                pattern: {
+                  value: /^[a-z0-9-]+$/,
+                  message: 'Slug must contain only lowercase letters, numbers, and hyphens',
+                },
+              })}
+              error={!!errors.slug}
+              helperText={errors.slug?.message as string}
+              placeholder="course-slug"
             />
-            {errors.slug && (
-              <p className="mt-1 text-sm text-red-600">Slug is required</p>
-            )}
           </div>
 
           <div>
@@ -86,33 +150,46 @@ export function CourseForm({ courseId }: CourseFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Description
             </label>
-            <textarea
-              {...register('description')}
-              rows={4}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+            <RichTextEditor
+              content={watch('description') || ''}
+              onChange={(content) => setValue('description', content)}
+              placeholder="Enter course description"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Course Image
+            </label>
+            <ImageUpload
+              value={watch('image_url')}
+              onChange={(url) => setValue('image_url', url)}
+              bucket="course-images"
+              folder="courses"
+              helperText="Upload a course image (max 5MB)"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Duration
               </label>
-              <input
+              <Input
                 {...register('duration')}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                placeholder="e.g., 6 months"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Level
               </label>
-              <input
+              <Input
                 {...register('level')}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                placeholder="e.g., Beginner, Intermediate"
               />
             </div>
           </div>

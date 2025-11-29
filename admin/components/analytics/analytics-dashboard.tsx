@@ -3,6 +3,21 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Database } from '@/lib/types/database.types'
 import { format } from 'date-fns'
+import {
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts'
 
 type Lead = Database['public']['Tables']['leads']['Row']
 type Profile = Database['public']['Tables']['profiles']['Row']
@@ -62,10 +77,15 @@ export function AnalyticsDashboard({
   const responseTimes = leads.map((lead) => {
     const leadActivities = activities.filter((activity) => activity.lead_id === lead.id)
     if (leadActivities.length === 0) return null
+    if (!lead.created_at) return null
 
-    const firstActivity = leadActivities.sort(
-      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-    )[0]
+    const firstActivity = leadActivities
+      .filter((a) => a.created_at)
+      .sort(
+        (a, b) => new Date(a.created_at!).getTime() - new Date(b.created_at!).getTime()
+      )[0]
+
+    if (!firstActivity?.created_at) return null
 
     const createdTime = new Date(lead.created_at).getTime()
     const firstActivityTime = new Date(firstActivity.created_at).getTime()
@@ -87,8 +107,9 @@ export function AnalyticsDashboard({
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
   const leadsOverTime = leads
-    .filter((lead) => new Date(lead.created_at) >= thirtyDaysAgo)
+    .filter((lead) => lead.created_at && new Date(lead.created_at) >= thirtyDaysAgo)
     .reduce((acc, lead) => {
+      if (!lead.created_at) return acc
       const date = format(new Date(lead.created_at), 'yyyy-MM-dd')
       acc[date] = (acc[date] || 0) + 1
       return acc
@@ -156,22 +177,32 @@ export function AnalyticsDashboard({
           <CardTitle>Lead Status Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {Object.entries(statusBreakdown).map(([status, count]) => (
-              <div key={status} className="flex items-center justify-between">
-                <span className="text-sm capitalize">{status.replace('_', ' ')}</span>
-                <div className="flex items-center gap-4">
-                  <div className="w-32 bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full"
-                      style={{ width: `${(count / leads.length) * 100}%` }}
-                    />
-                  </div>
-                  <span className="text-sm font-medium w-12 text-right">{count}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={Object.entries(statusBreakdown).map(([status, count]) => ({
+                  name: status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' '),
+                  value: count,
+                }))}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {Object.entries(statusBreakdown).map((_, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]}
+                  />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
 
@@ -181,22 +212,21 @@ export function AnalyticsDashboard({
           <CardTitle>Lead Source Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {Object.entries(sourceBreakdown).map(([source, count]) => (
-              <div key={source} className="flex items-center justify-between">
-                <span className="text-sm capitalize">{source.replace('_', ' ')}</span>
-                <div className="flex items-center gap-4">
-                  <div className="w-32 bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-green-600 h-2 rounded-full"
-                      style={{ width: `${(count / leads.length) * 100}%` }}
-                    />
-                  </div>
-                  <span className="text-sm font-medium w-12 text-right">{count}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={Object.entries(sourceBreakdown).map(([source, count]) => ({
+                name: source.charAt(0).toUpperCase() + source.slice(1).replace('_', ' '),
+                count,
+              }))}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="count" fill="#10b981" name="Leads" />
+            </BarChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
 
@@ -264,33 +294,34 @@ export function AnalyticsDashboard({
           <CardTitle>Leads Over Time (Last 30 Days)</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {Object.entries(leadsOverTime)
-              .sort(([a], [b]) => a.localeCompare(b))
-              .map(([date, count]) => (
-                <div key={date} className="flex items-center justify-between">
-                  <span className="text-sm">{format(new Date(date), 'MMM dd, yyyy')}</span>
-                  <div className="flex items-center gap-4">
-                    <div className="w-32 bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full"
-                        style={{
-                          width: `${
-                            (count /
-                              Math.max(...Object.values(leadsOverTime), 1)) *
-                            100
-                          }%`,
-                        }}
-                      />
-                    </div>
-                    <span className="text-sm font-medium w-12 text-right">{count}</span>
-                  </div>
-                </div>
-              ))}
-            {Object.keys(leadsOverTime).length === 0 && (
-              <p className="text-sm text-gray-500">No leads in the last 30 days</p>
-            )}
-          </div>
+          {Object.keys(leadsOverTime).length === 0 ? (
+            <p className="text-sm text-gray-500 text-center py-8">No leads in the last 30 days</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart
+                data={Object.entries(leadsOverTime)
+                  .sort(([a], [b]) => a.localeCompare(b))
+                  .map(([date, count]) => ({
+                    date: format(new Date(date), 'MMM dd'),
+                    leads: count,
+                  }))}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Area
+                  type="monotone"
+                  dataKey="leads"
+                  stroke="#2563eb"
+                  fill="#2563eb"
+                  fillOpacity={0.6}
+                  name="Leads"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
         </CardContent>
       </Card>
     </div>

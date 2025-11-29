@@ -41,9 +41,14 @@ export function ConversionFunnel({ leads }: ConversionFunnelProps) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="status" />
             <YAxis />
-            <Tooltip />
+            <Tooltip
+              formatter={(value: number) => [
+                `${value} (${leads.length > 0 ? ((value / leads.length) * 100).toFixed(1) : 0}%)`,
+                'Leads',
+              ]}
+            />
             <Legend />
-            <Bar dataKey="count" fill="#2563eb" name="Leads" />
+            <Bar dataKey="count" fill="#2563eb" name="Leads" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

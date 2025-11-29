@@ -34,6 +34,30 @@ export function RefineProvider({ children }: { children: React.ReactNode }) {
           },
         },
         {
+          name: 'course_modules',
+          list: '/modules',
+          create: '/modules/create',
+          edit: '/modules/:id',
+          meta: {
+            label: 'Modules',
+          },
+        },
+        {
+          name: 'enrollments',
+          list: '/enrollments',
+          show: '/enrollments/:id',
+          meta: {
+            label: 'Enrollments',
+          },
+        },
+        {
+          name: 'student_progress',
+          list: '/progress',
+          meta: {
+            label: 'Student Progress',
+          },
+        },
+        {
           name: 'video_promos',
           list: '/videos',
           create: '/videos/create',
@@ -50,11 +74,22 @@ export function RefineProvider({ children }: { children: React.ReactNode }) {
           },
         },
       ]}
-      options={{
-        syncWithLocation: true,
-        warnWhenUnsavedChanges: true,
-        projectId: 'lakshya-admin',
-      }}
+    options={{
+      syncWithLocation: true,
+      warnWhenUnsavedChanges: true,
+      projectId: 'lakshya-admin',
+    }}
+    queryOptions={{
+      defaultOptions: {
+        queries: {
+          staleTime: 5 * 60 * 1000, // 5 minutes
+          cacheTime: 10 * 60 * 1000, // 10 minutes
+          refetchOnWindowFocus: false,
+          refetchOnMount: false,
+          retry: 1,
+        },
+      },
+    }}
     >
       {children}
     </Refine>

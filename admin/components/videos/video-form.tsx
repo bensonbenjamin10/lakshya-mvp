@@ -4,12 +4,16 @@ import { useForm } from '@refinedev/react-hook-form'
 import { useList } from '@refinedev/core'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useToast } from '@/lib/hooks/use-toast'
+import { useRouter } from 'next/navigation'
 
 interface VideoFormProps {
   videoId?: string
 }
 
 export function VideoForm({ videoId }: VideoFormProps) {
+  const toast = useToast()
+  const router = useRouter()
   const coursesResult = useList({
     resource: 'courses',
   })
@@ -34,13 +38,19 @@ export function VideoForm({ videoId }: VideoFormProps) {
   const isFeatured = watch('is_featured')
   const isActive = watch('is_active')
 
-  const onSubmit = (data: any) => {
-    onFinish({
-      ...data,
-      is_featured: isFeatured || false,
-      is_active: isActive !== undefined ? isActive : true,
-      display_order: data.display_order || 0,
-    })
+  const onSubmit = async (data: any) => {
+    try {
+      await onFinish({
+        ...data,
+        is_featured: isFeatured || false,
+        is_active: isActive !== undefined ? isActive : true,
+        display_order: data.display_order || 0,
+      })
+      toast.success(videoId ? 'Video updated successfully' : 'Video created successfully')
+      router.push('/videos')
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to save video')
+    }
   }
 
   return (

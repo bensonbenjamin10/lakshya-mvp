@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { RefineProvider } from "@/lib/providers/refine-provider";
 import { Suspense } from "react";
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
         <Suspense fallback={<div>Loading...</div>}>
           <RefineProvider>{children}</RefineProvider>
         </Suspense>
+        <Toaster />
       </body>
     </html>
   );

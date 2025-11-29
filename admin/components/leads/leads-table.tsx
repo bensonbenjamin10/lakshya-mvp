@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useList, useInvalidate } from '@refinedev/core'
 import { format } from 'date-fns'
 import Link from 'next/link'
@@ -9,6 +9,14 @@ import { Card, CardContent } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/lib/types/database.types'
 import { BulkAssignment } from './bulk-assignment'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
+import { EmptyState } from '@/components/ui/empty-state'
+import { exportToCSV, exportToExcel } from '@/lib/utils/export'
+import { Download, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { useToast } from '@/lib/hooks/use-toast'
+
+type SortField = 'name' | 'email' | 'status' | 'source' | 'created_at' | null
+type SortOrder = 'asc' | 'desc'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
@@ -21,8 +29,11 @@ interface LeadsTableProps {
 }
 
 export function LeadsTable({ filters }: LeadsTableProps) {
+  const toast = useToast()
   const [profiles, setProfiles] = useState<Map<string, Profile>>(new Map())
   const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set())
+  const [sortField, setSortField] = useState<SortField>('created_at')
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
   const invalidate = useInvalidate()
 
   const [currentPage, setCurrentPage] = useState(1)
@@ -43,10 +54,52 @@ export function LeadsTable({ filters }: LeadsTableProps) {
     },
   })
 
-  const leads = (listResult.result?.data || []) as any[]
+  const allLeads = (listResult.result?.data || []) as any[]
   const isLoading = listResult.query?.isLoading || false
   const total = listResult.result?.total || 0
   const totalPages = Math.ceil(total / pageSize)
+
+  const leads = useMemo(() => {
+    if (!sortField) return allLeads
+    return [...allLeads].sort((a, b) => {
+      let aVal = a[sortField]
+      let bVal = b[sortField]
+
+      if (sortField === 'created_at') {
+        aVal = new Date(aVal || 0).getTime()
+        bVal = new Date(bVal || 0).getTime()
+      } else {
+        aVal = String(aVal || '').toLowerCase()
+        bVal = String(bVal || '').toLowerCase()
+      }
+
+      if (sortOrder === 'asc') {
+        return aVal > bVal ? 1 : aVal < bVal ? -1 : 0
+      } else {
+        return aVal < bVal ? 1 : aVal > bVal ? -1 : 0
+      }
+    })
+  }, [allLeads, sortField, sortOrder])
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortOrder('asc')
+    }
+  }
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="h-4 w-4 ml-1 text-gray-400" />
+    }
+    return sortOrder === 'asc' ? (
+      <ArrowUp className="h-4 w-4 ml-1 text-blue-600" />
+    ) : (
+      <ArrowDown className="h-4 w-4 ml-1 text-blue-600" />
+    )
+  }
 
   useEffect(() => {
     const supabase = createClient()
@@ -103,17 +156,42 @@ export function LeadsTable({ filters }: LeadsTableProps) {
   }, [filters.status, filters.source, filters.assignedTo])
 
   if (isLoading) {
-    return <div className="p-4">Loading leads...</div>
+    return <TableSkeleton rows={5} columns={9} />
   }
 
   if (leads.length === 0) {
     return (
-      <Card>
-        <CardContent className="p-8 text-center text-gray-500">
-          No leads found
-        </CardContent>
-      </Card>
+      <EmptyState
+        title="No leads found"
+        description="Leads will appear here once they submit inquiry forms."
+      />
     )
+  }
+
+  const handleExport = async (format: 'csv' | 'excel') => {
+    try {
+      const exportData = leads.map((lead) => ({
+        Name: lead.name,
+        Email: lead.email,
+        Phone: lead.phone,
+        Country: lead.country || 'N/A',
+        'Inquiry Type': lead.inquiry_type,
+        Source: lead.source || 'N/A',
+        Status: lead.status || 'new',
+        'Assigned To': getAssignedName(lead.assigned_to),
+        'Created At': lead.created_at ? format(new Date(lead.created_at), 'MMM dd, yyyy') : 'N/A',
+      }))
+
+      if (format === 'csv') {
+        exportToCSV(exportData, 'leads')
+        toast.success('Leads exported to CSV')
+      } else {
+        await exportToExcel(exportData, 'leads', 'Leads')
+        toast.success('Leads exported to Excel')
+      }
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to export leads')
+    }
   }
 
   return (
@@ -125,6 +203,28 @@ export function LeadsTable({ filters }: LeadsTableProps) {
         />
       )}
       <Card>
+        <CardContent className="p-4">
+          <div className="mb-4 flex items-center justify-end gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleExport('csv')}
+              disabled={leads.length === 0}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleExport('excel')}
+              disabled={leads.length === 0}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export Excel
+            </Button>
+          </div>
+        </CardContent>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -139,25 +239,55 @@ export function LeadsTable({ filters }: LeadsTableProps) {
                     />
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
+                    <button
+                      onClick={() => handleSort('name')}
+                      className="flex items-center hover:text-gray-700"
+                    >
+                      Name
+                      <SortIcon field="name" />
+                    </button>
                   </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
+                  <button
+                    onClick={() => handleSort('email')}
+                    className="flex items-center hover:text-gray-700"
+                  >
+                    Email
+                    <SortIcon field="email" />
+                  </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Phone
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  <button
+                    onClick={() => handleSort('status')}
+                    className="flex items-center hover:text-gray-700"
+                  >
+                    Status
+                    <SortIcon field="status" />
+                  </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Source
+                  <button
+                    onClick={() => handleSort('source')}
+                    className="flex items-center hover:text-gray-700"
+                  >
+                    Source
+                    <SortIcon field="source" />
+                  </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Assigned To
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created
+                  <button
+                    onClick={() => handleSort('created_at')}
+                    className="flex items-center hover:text-gray-700"
+                  >
+                    Created
+                    <SortIcon field="created_at" />
+                  </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -272,6 +402,7 @@ export function LeadsTable({ filters }: LeadsTableProps) {
         )}
       </CardContent>
     </Card>
+    </>
   )
 }
 
