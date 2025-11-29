@@ -12,6 +12,7 @@ import 'package:lakshya_mvp/screens/auth/register_screen.dart';
 import 'package:lakshya_mvp/screens/student/dashboard_screen.dart';
 import 'package:lakshya_mvp/screens/student/my_courses_screen.dart';
 import 'package:lakshya_mvp/screens/student/course_content_screen.dart';
+import 'package:lakshya_mvp/screens/student/module_detail_screen.dart';
 import 'package:lakshya_mvp/screens/student/profile_screen.dart';
 import 'package:lakshya_mvp/widgets/app_shell.dart';
 import 'package:lakshya_mvp/services/analytics_service.dart';
@@ -204,6 +205,26 @@ class AppRouter {
           child: const StudentProfileScreen(),
           transitionsBuilder: _fadeTransition,
         ),
+      ),
+      // Module detail route
+      GoRoute(
+        path: '/student/courses/:courseId/modules/:moduleId',
+        name: 'student-module-detail',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) {
+          final courseId = state.pathParameters['courseId']!;
+          final moduleId = state.pathParameters['moduleId']!;
+          final enrollmentId = state.uri.queryParameters['enrollmentId'] ?? '';
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: ModuleDetailScreen(
+              courseId: courseId,
+              moduleId: moduleId,
+              enrollmentId: enrollmentId,
+            ),
+            transitionsBuilder: _slideUpTransition,
+          );
+        },
       ),
     ],
   );

@@ -126,13 +126,14 @@ class LakshyaApp extends StatelessWidget {
             ctx.read<SupabaseClient>(),
           ),
         ),
-        ChangeNotifierProvider<StudentProvider>(
-          create: (ctx) => StudentProvider(
-            ctx.read<EnrollmentRepository>(),
-            ctx.read<StudentProgressRepository>(),
-            ctx.read<SupabaseClient>(),
-          ),
-        ),
+            ChangeNotifierProvider<StudentProvider>(
+              create: (ctx) => StudentProvider(
+                ctx.read<EnrollmentRepository>(),
+                ctx.read<StudentProgressRepository>(),
+                ctx.read<CourseModuleRepository>(),
+                ctx.read<SupabaseClient>(),
+              ),
+            ),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
       ],

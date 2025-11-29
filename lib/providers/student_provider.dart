@@ -1,18 +1,22 @@
 import 'package:flutter/foundation.dart';
 import 'package:lakshya_mvp/core/repositories/enrollment_repository.dart';
 import 'package:lakshya_mvp/core/repositories/student_progress_repository.dart';
+import 'package:lakshya_mvp/core/repositories/course_module_repository.dart';
 import 'package:lakshya_mvp/models/enrollment.dart';
 import 'package:lakshya_mvp/models/student_progress.dart';
+import 'package:lakshya_mvp/models/course_module.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Student provider for managing student-specific data and statistics
 class StudentProvider with ChangeNotifier {
   final EnrollmentRepository _enrollmentRepository;
   final StudentProgressRepository _progressRepository;
+  final CourseModuleRepository _moduleRepository;
   final SupabaseClient _client;
 
   List<Enrollment> _enrollments = [];
   Map<String, List<StudentProgress>> _progressMap = {};
+  Map<String, List<CourseModule>> _modulesMap = {}; // courseId -> modules
   bool _isLoading = false;
   String? _error;
 
@@ -25,6 +29,7 @@ class StudentProvider with ChangeNotifier {
   StudentProvider(
     this._enrollmentRepository,
     this._progressRepository,
+    this._moduleRepository,
     this._client,
   ) {
     _loadStudentData();
@@ -63,10 +68,16 @@ class StudentProvider with ChangeNotifier {
       // Load enrollments
       _enrollments = await _enrollmentRepository.getByStudentId(userId);
 
-      // Load progress for each enrollment
+      // Load progress and modules for each enrollment
       for (final enrollment in _enrollments) {
         final progress = await _progressRepository.getByEnrollmentId(enrollment.id);
         _progressMap[enrollment.id] = progress;
+        
+        // Load modules for the course
+        if (!_modulesMap.containsKey(enrollment.courseId)) {
+          final modules = await _moduleRepository.getByCourseId(enrollment.courseId);
+          _modulesMap[enrollment.courseId] = modules;
+        }
       }
 
       _updateStatistics();
@@ -115,6 +126,34 @@ class StudentProvider with ChangeNotifier {
       );
     } catch (e) {
       return null;
+    }
+  }
+
+  /// Get modules for a specific course
+  List<CourseModule> getModulesForCourse(String courseId) {
+    return _modulesMap[courseId] ?? [];
+  }
+
+  /// Get progress for a specific module within an enrollment
+  StudentProgress? getModuleProgress(String enrollmentId, String moduleId) {
+    final progressList = _progressMap[enrollmentId] ?? [];
+    try {
+      return progressList.firstWhere(
+        (p) => p.moduleId == moduleId,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Refresh modules for a course (useful when modules are added)
+  Future<void> refreshModulesForCourse(String courseId) async {
+    try {
+      final modules = await _moduleRepository.getByCourseId(courseId);
+      _modulesMap[courseId] = modules;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error refreshing modules: $e');
     }
   }
 }
