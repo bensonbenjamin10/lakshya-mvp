@@ -5,9 +5,11 @@
   "targets": {
     "paperlms-001": {
       "hosting": {
-        "app": [
-          "lakshya-app"
-        ],
+        "admin": [
+          "admin-lakshya"
+        ]
+      },
+      "run": {
         "admin": [
           "admin-lakshya"
         ]

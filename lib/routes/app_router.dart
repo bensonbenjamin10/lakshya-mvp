@@ -9,11 +9,6 @@ import 'package:lakshya_mvp/screens/contact_screen.dart';
 import 'package:lakshya_mvp/screens/about_screen.dart';
 import 'package:lakshya_mvp/screens/auth/login_screen.dart';
 import 'package:lakshya_mvp/screens/auth/register_screen.dart';
-import 'package:lakshya_mvp/screens/admin/admin_dashboard.dart';
-import 'package:lakshya_mvp/screens/admin/leads_management.dart';
-import 'package:lakshya_mvp/screens/admin/lead_detail.dart';
-import 'package:lakshya_mvp/screens/admin/courses_management.dart';
-import 'package:lakshya_mvp/screens/admin/videos_management.dart';
 import 'package:lakshya_mvp/widgets/app_shell.dart';
 import 'package:lakshya_mvp/services/analytics_service.dart';
 
@@ -161,60 +156,6 @@ class AppRouter {
             transitionsBuilder: _fadeTransition,
           );
         },
-      ),
-      // Admin routes - require authentication
-      GoRoute(
-        path: '/admin',
-        name: 'admin',
-        parentNavigatorKey: _rootNavigatorKey,
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          child: const AdminDashboard(),
-          transitionsBuilder: _fadeTransition,
-        ),
-      ),
-      GoRoute(
-        path: '/admin/leads',
-        name: 'admin-leads',
-        parentNavigatorKey: _rootNavigatorKey,
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          child: const LeadsManagement(),
-          transitionsBuilder: _fadeTransition,
-        ),
-      ),
-      GoRoute(
-        path: '/admin/leads/:id',
-        name: 'admin-lead-detail',
-        parentNavigatorKey: _rootNavigatorKey,
-        pageBuilder: (context, state) {
-          final leadId = state.pathParameters['id']!;
-          return CustomTransitionPage(
-            key: state.pageKey,
-            child: LeadDetail(leadId: leadId),
-            transitionsBuilder: _slideUpTransition,
-          );
-        },
-      ),
-      GoRoute(
-        path: '/admin/courses',
-        name: 'admin-courses',
-        parentNavigatorKey: _rootNavigatorKey,
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          child: const CoursesManagement(),
-          transitionsBuilder: _fadeTransition,
-        ),
-      ),
-      GoRoute(
-        path: '/admin/videos',
-        name: 'admin-videos',
-        parentNavigatorKey: _rootNavigatorKey,
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          child: const VideosManagement(),
-          transitionsBuilder: _fadeTransition,
-        ),
       ),
     ],
   );
