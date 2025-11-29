@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:go_router/go_router.dart';
 import 'package:lakshya_mvp/screens/splash_screen.dart';
 import 'package:lakshya_mvp/screens/home_screen.dart';
@@ -23,12 +24,21 @@ class AppRouter {
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/splash',
+    // On web: use browser URL (allows direct /login, /admin navigation)
+    // On mobile: start with splash screen
+    initialLocation: kIsWeb ? '/' : '/splash',
     observers: [
       if (AnalyticsService.observer != null) AnalyticsService.observer!,
     ],
     onException: (context, state, exception) {
       debugPrint('GoRouter exception: $exception');
+    },
+    redirect: (context, state) {
+      // On mobile, redirect root to splash screen
+      if (!kIsWeb && state.uri.path == '/') {
+        return '/splash';
+      }
+      return null; // No redirect needed
     },
     routes: [
       // Splash Screen with fade transition

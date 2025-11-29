@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
@@ -50,12 +51,20 @@ class _SplashScreenState extends State<SplashScreen>
     // Start animation
     _controller.forward();
 
-    // Navigate after delay
-    Future.delayed(const Duration(milliseconds: 3000), () {
-      if (mounted) {
-        context.go('/');
-      }
-    });
+    // Navigate after delay - only on mobile or if explicitly on splash route
+    // On web, don't auto-redirect (allows direct navigation to /login, etc.)
+    if (!kIsWeb) {
+      Future.delayed(const Duration(milliseconds: 3000), () {
+        if (mounted) {
+          // Only redirect if we're still on the splash route
+          final router = GoRouter.of(context);
+          final currentLocation = router.routerDelegate.currentConfiguration.uri.path;
+          if (currentLocation == '/splash') {
+            context.go('/');
+          }
+        }
+      });
+    }
   }
 
   @override
