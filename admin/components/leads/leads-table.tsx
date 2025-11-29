@@ -14,16 +14,17 @@ interface LeadsTableProps {
 }
 
 export function LeadsTable({ filters }: LeadsTableProps) {
-  const { data, isLoading } = useList({
+  const listResult = useList({
     resource: 'leads',
     filters: [
-      ...(filters.status ? [{ field: 'status', operator: 'eq', value: filters.status }] : []),
-      ...(filters.source ? [{ field: 'source', operator: 'eq', value: filters.source }] : []),
+      ...(filters.status ? [{ field: 'status', operator: 'eq' as const, value: filters.status }] : []),
+      ...(filters.source ? [{ field: 'source', operator: 'eq' as const, value: filters.source }] : []),
     ],
-    sorters: [{ field: 'created_at', order: 'desc' }],
+    sorters: [{ field: 'created_at', order: 'desc' as const }],
   })
 
-  const leads = data?.data || []
+  const leads = (listResult.result?.data || []) as any[]
+  const isLoading = listResult.query?.isLoading || false
 
   if (isLoading) {
     return <div className="p-4">Loading leads...</div>

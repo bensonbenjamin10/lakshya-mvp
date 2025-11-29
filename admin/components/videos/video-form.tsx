@@ -10,10 +10,10 @@ interface VideoFormProps {
 }
 
 export function VideoForm({ videoId }: VideoFormProps) {
-  const { data: coursesData } = useList({
+  const coursesResult = useList({
     resource: 'courses',
   })
-  const courses = coursesData?.data || []
+  const courses = (coursesResult.result?.data || []) as any[]
 
   const {
     refineCore: { onFinish, formLoading },

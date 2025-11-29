@@ -3,6 +3,8 @@
 import { VideoForm } from '@/components/videos/video-form'
 import { useParams } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 export default function EditVideoPage() {
   const params = useParams()
   const videoId = params.id as string

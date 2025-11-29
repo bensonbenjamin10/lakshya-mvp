@@ -2,6 +2,9 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
+import { Database } from '@/lib/types/database.types'
+
+type Profile = Database['public']['Tables']['profiles']['Row']
 
 export default async function DashboardLayout({
   children,
@@ -24,7 +27,9 @@ export default async function DashboardLayout({
     .eq('id', session.user.id)
     .single()
 
-  if (profile?.role !== 'admin' && profile?.role !== 'faculty') {
+  const profileData = profile as Profile | null
+
+  if (profileData?.role !== 'admin' && profileData?.role !== 'faculty') {
     redirect('/login')
   }
 

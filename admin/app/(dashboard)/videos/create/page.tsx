@@ -2,6 +2,8 @@
 
 import { VideoForm } from '@/components/videos/video-form'
 
+export const dynamic = 'force-dynamic'
+
 export default function CreateVideoPage() {
   return (
     <div className="space-y-6">

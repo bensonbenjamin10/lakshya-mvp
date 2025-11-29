@@ -54,3 +54,10 @@ app.*.map.json
 # But if you have local Firebase config files with sensitive keys, add them here
 # /web/firebase-config.js (if it contains actual keys - currently it's a template)
 
+# Next.js Admin Panel
+admin/.env.local
+admin/.env*.local
+admin/.next/
+admin/out/
+admin/node_modules/
+

@@ -6,12 +6,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 export function CoursesTable() {
-  const { data, isLoading } = useList({
+  const listResult = useList({
     resource: 'courses',
     sorters: [{ field: 'created_at', order: 'desc' }],
   })
 
-  const courses = data?.data || []
+  const courses = (listResult.result?.data || []) as any[]
+  const isLoading = listResult.query?.isLoading || false
 
   if (isLoading) {
     return <div className="p-4">Loading courses...</div>

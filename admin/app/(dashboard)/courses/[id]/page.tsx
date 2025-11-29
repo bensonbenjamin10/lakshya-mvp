@@ -3,6 +3,8 @@
 import { CourseForm } from '@/components/courses/course-form'
 import { useParams } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 export default function EditCoursePage() {
   const params = useParams()
   const courseId = params.id as string

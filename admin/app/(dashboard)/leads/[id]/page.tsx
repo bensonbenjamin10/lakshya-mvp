@@ -1,25 +1,27 @@
-'use client'
-
-import { useShow } from '@refinedev/core'
-import { useParams } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 import { format } from 'date-fns'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { Database } from '@/lib/types/database.types'
 
-export default function LeadDetailPage() {
-  const params = useParams()
-  const { data, isLoading } = useShow({
-    resource: 'leads',
-    id: params.id as string,
-  })
+type Lead = Database['public']['Tables']['leads']['Row']
 
-  const lead = data?.data
+export default async function LeadDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const supabase = await createClient()
+  const { data: leadData } = await supabase
+    .from('leads')
+    .select('*')
+    .eq('id', id)
+    .single()
 
-  if (isLoading) {
-    return <div className="p-4">Loading...</div>
-  }
+  const lead = leadData as Lead | null
 
   if (!lead) {
     return <div className="p-4">Lead not found</div>
@@ -88,15 +90,15 @@ export default function LeadDetailPage() {
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500">Source</label>
-              <p className="text-sm">{lead.source.replace('_', ' ')}</p>
+              <p className="text-sm">{lead.source?.replace('_', ' ') || 'N/A'}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500">Inquiry Type</label>
-              <p className="text-sm">{lead.inquiry_type.replace('_', ' ')}</p>
+              <p className="text-sm">{lead.inquiry_type?.replace('_', ' ') || 'N/A'}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500">Created</label>
-              <p className="text-sm">{format(new Date(lead.created_at), 'PPpp')}</p>
+              <p className="text-sm">{lead.created_at ? format(new Date(lead.created_at), 'PPpp') : 'N/A'}</p>
             </div>
           </CardContent>
         </Card>

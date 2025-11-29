@@ -1,5 +1,8 @@
 import { AuthProvider } from '@refinedev/core'
 import { createClient } from '@/lib/supabase/client'
+import { Database } from '@/lib/types/database.types'
+
+type Profile = Database['public']['Tables']['profiles']['Row']
 
 export const authProvider: AuthProvider = {
   login: async ({ email, password }) => {
@@ -26,7 +29,9 @@ export const authProvider: AuthProvider = {
       .eq('id', data.user.id)
       .single()
 
-    if (profile?.role !== 'admin' && profile?.role !== 'faculty') {
+    const profileData = profile as Profile | null
+
+    if (profileData?.role !== 'admin' && profileData?.role !== 'faculty') {
       await supabase.auth.signOut()
       return {
         success: false,
@@ -77,7 +82,9 @@ export const authProvider: AuthProvider = {
       .eq('id', data.session.user.id)
       .single()
 
-    if (profile?.role !== 'admin' && profile?.role !== 'faculty') {
+    const profileData = profile as Profile | null
+
+    if (profileData?.role !== 'admin' && profileData?.role !== 'faculty') {
       return {
         authenticated: false,
         redirectTo: '/login',
@@ -100,11 +107,13 @@ export const authProvider: AuthProvider = {
         .eq('id', data.user.id)
         .single()
 
+      const profileData = profile as Profile | null
+
       return {
         id: data.user.id,
-        name: profile?.full_name || data.user.email || '',
+        name: profileData?.full_name || data.user.email || '',
         email: data.user.email || '',
-        avatar: profile?.avatar_url,
+        avatar: profileData?.avatar_url,
       }
     }
 

@@ -53,7 +53,6 @@ export function RefineProvider({ children }: { children: React.ReactNode }) {
       options={{
         syncWithLocation: true,
         warnWhenUnsavedChanges: true,
-        useNewQueryKeys: true,
         projectId: 'lakshya-admin',
       }}
     >

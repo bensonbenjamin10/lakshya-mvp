@@ -6,12 +6,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 export function VideosTable() {
-  const { data, isLoading } = useList({
+  const listResult = useList({
     resource: 'video_promos',
     sorters: [{ field: 'display_order', order: 'asc' }],
   })
 
-  const videos = data?.data || []
+  const videos = (listResult.result?.data || []) as any[]
+  const isLoading = listResult.query?.isLoading || false
 
   if (isLoading) {
     return <div className="p-4">Loading videos...</div>
