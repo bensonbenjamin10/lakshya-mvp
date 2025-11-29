@@ -9,6 +9,10 @@ import 'package:lakshya_mvp/screens/contact_screen.dart';
 import 'package:lakshya_mvp/screens/about_screen.dart';
 import 'package:lakshya_mvp/screens/auth/login_screen.dart';
 import 'package:lakshya_mvp/screens/auth/register_screen.dart';
+import 'package:lakshya_mvp/screens/student/dashboard_screen.dart';
+import 'package:lakshya_mvp/screens/student/my_courses_screen.dart';
+import 'package:lakshya_mvp/screens/student/course_content_screen.dart';
+import 'package:lakshya_mvp/screens/student/profile_screen.dart';
 import 'package:lakshya_mvp/widgets/app_shell.dart';
 import 'package:lakshya_mvp/services/analytics_service.dart';
 
@@ -156,6 +160,50 @@ class AppRouter {
             transitionsBuilder: _fadeTransition,
           );
         },
+      ),
+      // Student routes - protected, requires auth
+      GoRoute(
+        path: '/student/dashboard',
+        name: 'student-dashboard',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const StudentDashboardScreen(),
+          transitionsBuilder: _fadeTransition,
+        ),
+      ),
+      GoRoute(
+        path: '/student/courses',
+        name: 'student-courses',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const MyCoursesScreen(),
+          transitionsBuilder: _fadeTransition,
+        ),
+      ),
+      GoRoute(
+        path: '/student/courses/:id/content',
+        name: 'student-course-content',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) {
+          final courseId = state.pathParameters['id']!;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: CourseContentScreen(courseId: courseId),
+            transitionsBuilder: _slideUpTransition,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/student/profile',
+        name: 'student-profile',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const StudentProfileScreen(),
+          transitionsBuilder: _fadeTransition,
+        ),
       ),
     ],
   );

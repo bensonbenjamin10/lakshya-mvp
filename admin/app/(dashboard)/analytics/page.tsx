@@ -1,16 +1,21 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { AnalyticsDashboard } from '@/components/analytics/analytics-dashboard'
 
 export default async function AnalyticsPage() {
   const supabase = await createClient()
 
-  const [leadsData, coursesData] = await Promise.all([
+  const [leadsData, coursesData, profilesData, activitiesData] = await Promise.all([
     supabase.from('leads').select('*'),
     supabase.from('courses').select('*'),
+    supabase.from('profiles').select('*').in('role', ['admin', 'faculty']),
+    supabase.from('lead_activities').select('*'),
   ])
 
   const leads = leadsData.data || []
   const courses = coursesData.data || []
+  const profiles = profilesData.data || []
+  const activities = activitiesData.data || []
 
   return (
     <div className="space-y-6">
@@ -19,35 +24,12 @@ export default async function AnalyticsPage() {
         <p className="text-gray-600 mt-1">Detailed analytics and insights</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Lead Sources</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600">Total leads: {leads.length}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Leads Over Time</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600">Chart coming soon...</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Lead Status Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-gray-600">Chart coming soon...</p>
-        </CardContent>
-      </Card>
+      <AnalyticsDashboard
+        leads={leads}
+        courses={courses}
+        profiles={profiles}
+        activities={activities}
+      />
     </div>
   )
 }
-

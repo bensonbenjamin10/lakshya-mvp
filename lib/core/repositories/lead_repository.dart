@@ -1,4 +1,5 @@
 import 'package:lakshya_mvp/core/repositories/base_repository.dart';
+import 'package:lakshya_mvp/core/utils/error_handler.dart';
 import 'package:lakshya_mvp/models/lead.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -23,7 +24,8 @@ class LeadRepository implements BaseRepository<Lead> {
         response.map((json) => Lead.fromJson(json)),
       );
     } catch (e) {
-      throw Exception('Failed to fetch leads: $e');
+      ErrorHandler.handleError(e, context: 'LeadRepository.getAll');
+      throw Exception('Failed to fetch leads: ${ErrorHandler.getErrorMessage(e)}');
     }
   }
 

@@ -3,10 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:lakshya_mvp/providers/course_provider.dart';
+import 'package:lakshya_mvp/providers/enrollment_provider.dart';
 import 'package:lakshya_mvp/models/lead.dart';
 import 'package:lakshya_mvp/models/course.dart';
+import 'package:lakshya_mvp/models/enrollment.dart';
 import 'package:lakshya_mvp/widgets/lead_form_dialog.dart';
 import 'package:lakshya_mvp/widgets/vimeo_player.dart';
+import 'package:lakshya_mvp/widgets/student/enrollment_badge.dart';
+import 'package:lakshya_mvp/widgets/student/progress_indicator.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
 import 'package:lakshya_mvp/services/analytics_service.dart';
 import 'package:lakshya_mvp/providers/video_promo_provider.dart';
@@ -26,6 +30,7 @@ class CourseDetailScreen extends StatefulWidget {
 
 class _CourseDetailScreenState extends State<CourseDetailScreen> {
   bool _hasTrackedView = false;
+  Enrollment? _enrollment;
 
   @override
   void didChangeDependencies() {
@@ -42,6 +47,16 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         courseName: course.title,
       );
       _hasTrackedView = true;
+    }
+    // Check enrollment status
+    _checkEnrollmentStatus();
+  }
+
+  Future<void> _checkEnrollmentStatus() async {
+    final enrollmentProvider = Provider.of<EnrollmentProvider>(context, listen: false);
+    _enrollment = await enrollmentProvider.getEnrollmentForCourse(widget.courseId);
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -124,6 +139,14 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: AppSpacing.massive),
+                        // Enrollment badge if enrolled
+                        if (_enrollment != null && _enrollment!.status == EnrollmentStatus.active)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
+                            child: EnrollmentBadge(enrollment: _enrollment!),
+                          ),
+                        if (_enrollment != null && _enrollment!.status == EnrollmentStatus.active)
+                          const SizedBox(height: AppSpacing.sm),
                         // Course Icon
                         Container(
                           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -323,71 +346,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                     ),
                   ),
 
-                  // CTA Card
-                  Container(
-                    margin: const EdgeInsets.all(AppSpacing.screenPadding),
-                    padding: const EdgeInsets.all(AppSpacing.xxl),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [courseColor, courseColor.withValues(alpha: 0.8)],
-                      ),
-                      borderRadius: AppSpacing.borderRadiusLg,
-                    ),
-                    child: Column(
-                      children: [
-                        const Icon(
-                          Icons.school_rounded,
-                          size: AppSpacing.iconXl,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          'Ready to Start?',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          'Join thousands of successful students',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Colors.white.withValues(alpha: 0.9),
-                              ),
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        SizedBox(
-                          width: double.infinity,
-                          height: AppSpacing.buttonHeightLg,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => LeadFormDialog(
-                                  courseId: course.id,
-                                  inquiryType: InquiryType.enrollment,
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: courseColor,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: AppSpacing.borderRadiusSm,
-                              ),
-                            ),
-                            child: const Text(
-                              'Enroll Now',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // CTA Card - Conditional based on enrollment status
+                  _buildCTACard(context, course, courseColor),
 
                   // Bottom spacing for action bar
                   const SizedBox(height: 100),
@@ -401,8 +361,93 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
           bottomNavigationBar: _BottomActionBar(
             course: course,
             courseColor: courseColor,
+            enrollment: _enrollment,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCTACard(BuildContext context, Course course, Color courseColor) {
+    final isEnrolled = _enrollment != null && _enrollment!.status == EnrollmentStatus.active;
+
+    return Container(
+      margin: const EdgeInsets.all(AppSpacing.screenPadding),
+      padding: const EdgeInsets.all(AppSpacing.xxl),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [courseColor, courseColor.withValues(alpha: 0.8)],
+        ),
+        borderRadius: AppSpacing.borderRadiusLg,
+      ),
+      child: Column(
+        children: [
+          Icon(
+            isEnrolled ? Icons.play_circle_rounded : Icons.school_rounded,
+            size: AppSpacing.iconXl,
+            color: Colors.white,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            isEnrolled ? 'Continue Learning' : 'Ready to Start?',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            isEnrolled
+                ? 'Access your course materials and continue your journey'
+                : 'Join thousands of successful students',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.9),
+                ),
+          ),
+          if (isEnrolled && _enrollment != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            ProgressIndicatorWidget(
+              progress: _enrollment!.progressPercentage,
+              showLabel: true,
+            ),
+          ],
+          const SizedBox(height: AppSpacing.lg),
+          SizedBox(
+            width: double.infinity,
+            height: AppSpacing.buttonHeightLg,
+            child: ElevatedButton(
+              onPressed: () {
+                if (isEnrolled) {
+                  // Navigate to course content
+                  context.push('/student/courses/${course.id}/content');
+                } else {
+                  // Show enrollment dialog
+                  showDialog(
+                    context: context,
+                    builder: (context) => LeadFormDialog(
+                      courseId: course.id,
+                      inquiryType: InquiryType.enrollment,
+                    ),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: courseColor,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: AppSpacing.borderRadiusSm,
+                ),
+              ),
+              child: Text(
+                isEnrolled ? 'Access Course' : 'Enroll Now',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -640,10 +685,12 @@ class _FeatureRow extends StatelessWidget {
 class _BottomActionBar extends StatelessWidget {
   final Course course;
   final Color courseColor;
+  final Enrollment? enrollment;
 
   const _BottomActionBar({
     required this.course,
     required this.courseColor,
+    this.enrollment,
   });
 
   @override
@@ -692,19 +739,25 @@ class _BottomActionBar extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.md),
-            // Enroll Now Button (Full width)
+            // Enroll Now / Access Course Button (Full width)
             Expanded(
               child: SizedBox(
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => LeadFormDialog(
-                        courseId: course.id,
-                        inquiryType: InquiryType.enrollment,
-                      ),
-                    );
+                    final isEnrolled = enrollment != null &&
+                        enrollment!.status == EnrollmentStatus.active;
+                    if (isEnrolled) {
+                      context.push('/student/courses/${course.id}/content');
+                    } else {
+                      showDialog(
+                        context: context,
+                        builder: (context) => LeadFormDialog(
+                          courseId: course.id,
+                          inquiryType: InquiryType.enrollment,
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: courseColor,
@@ -717,10 +770,19 @@ class _BottomActionBar extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.school_rounded, size: 20),
+                      Icon(
+                        enrollment != null &&
+                                enrollment!.status == EnrollmentStatus.active
+                            ? Icons.play_circle_rounded
+                            : Icons.school_rounded,
+                        size: 20,
+                      ),
                       const SizedBox(width: AppSpacing.sm),
                       Text(
-                        'Enroll Now',
+                        enrollment != null &&
+                                enrollment!.status == EnrollmentStatus.active
+                            ? 'Access Course'
+                            : 'Enroll Now',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,

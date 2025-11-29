@@ -8,15 +8,23 @@ import 'package:go_router/go_router.dart' show GoRouter;
 import 'package:lakshya_mvp/core/repositories/lead_repository.dart';
 import 'package:lakshya_mvp/core/repositories/course_repository.dart';
 import 'package:lakshya_mvp/core/repositories/video_promo_repository.dart';
+import 'package:lakshya_mvp/core/repositories/lead_activity_repository.dart';
+import 'package:lakshya_mvp/core/repositories/enrollment_repository.dart';
+import 'package:lakshya_mvp/core/repositories/student_progress_repository.dart';
+import 'package:lakshya_mvp/core/repositories/course_module_repository.dart';
 import 'package:lakshya_mvp/services/auth_service.dart';
 import 'package:lakshya_mvp/services/storage_service.dart';
 import 'package:lakshya_mvp/services/analytics_service.dart';
+import 'package:lakshya_mvp/services/payment/payment_service.dart';
 import 'package:lakshya_mvp/providers/lead_provider.dart';
 import 'package:lakshya_mvp/providers/course_provider.dart';
 import 'package:lakshya_mvp/providers/video_promo_provider.dart';
+import 'package:lakshya_mvp/providers/lead_activity_provider.dart';
 import 'package:lakshya_mvp/providers/auth_provider.dart';
 import 'package:lakshya_mvp/providers/theme_provider.dart';
 import 'package:lakshya_mvp/providers/favorites_provider.dart';
+import 'package:lakshya_mvp/providers/enrollment_provider.dart';
+import 'package:lakshya_mvp/providers/student_provider.dart';
 import 'package:lakshya_mvp/routes/app_router.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
 
@@ -72,6 +80,18 @@ class LakshyaApp extends StatelessWidget {
         Provider<VideoPromoRepository>(
           create: (ctx) => VideoPromoRepository(ctx.read<SupabaseClient>()),
         ),
+        Provider<LeadActivityRepository>(
+          create: (ctx) => LeadActivityRepository(ctx.read<SupabaseClient>()),
+        ),
+        Provider<EnrollmentRepository>(
+          create: (ctx) => EnrollmentRepository(ctx.read<SupabaseClient>()),
+        ),
+        Provider<StudentProgressRepository>(
+          create: (ctx) => StudentProgressRepository(ctx.read<SupabaseClient>()),
+        ),
+        Provider<CourseModuleRepository>(
+          create: (ctx) => CourseModuleRepository(ctx.read<SupabaseClient>()),
+        ),
         
         // Services (depend on Supabase client)
         Provider<AuthService>(
@@ -79,6 +99,9 @@ class LakshyaApp extends StatelessWidget {
         ),
         Provider<StorageService>(
           create: (ctx) => StorageService(ctx.read<SupabaseClient>()),
+        ),
+        Provider<PaymentService>(
+          create: (_) => PaymentService(),
         ),
         
         // Providers (depend on services/repositories)
@@ -93,6 +116,22 @@ class LakshyaApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<VideoPromoProvider>(
           create: (ctx) => VideoPromoProvider(ctx.read<VideoPromoRepository>()),
+        ),
+        ChangeNotifierProvider<LeadActivityProvider>(
+          create: (ctx) => LeadActivityProvider(ctx.read<LeadActivityRepository>()),
+        ),
+        ChangeNotifierProvider<EnrollmentProvider>(
+          create: (ctx) => EnrollmentProvider(
+            ctx.read<EnrollmentRepository>(),
+            ctx.read<SupabaseClient>(),
+          ),
+        ),
+        ChangeNotifierProvider<StudentProvider>(
+          create: (ctx) => StudentProvider(
+            ctx.read<EnrollmentRepository>(),
+            ctx.read<StudentProgressRepository>(),
+            ctx.read<SupabaseClient>(),
+          ),
         ),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),

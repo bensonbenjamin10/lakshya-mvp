@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:lakshya_mvp/providers/course_provider.dart';
 import 'package:lakshya_mvp/providers/favorites_provider.dart';
+import 'package:lakshya_mvp/providers/enrollment_provider.dart';
 import 'package:lakshya_mvp/models/course.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
 import 'package:lakshya_mvp/widgets/shared/skeleton_loader.dart';
@@ -442,6 +443,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final course = filteredCourses[index];
+            // Check enrollment status asynchronously - will be enhanced later
             return _CourseCard(
               course: course,
               onTap: () {

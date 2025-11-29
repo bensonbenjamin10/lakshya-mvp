@@ -8,6 +8,7 @@ export default function LeadsPage() {
   const [filters, setFilters] = useState<{
     status?: string
     source?: string
+    assignedTo?: string
   }>({})
 
   return (

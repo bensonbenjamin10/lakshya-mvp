@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ArrowLeft, Save, User } from 'lucide-react'
 import { Database } from '@/lib/types/database.types'
+import { LeadActivityLog } from '@/components/leads/lead-activity-log'
 
 type Lead = Database['public']['Tables']['leads']['Row']
 type LeadUpdate = Database['public']['Tables']['leads']['Update']
@@ -295,6 +296,8 @@ export default function LeadDetailPage({ params }: LeadDetailPageProps) {
           </CardContent>
         </Card>
       </div>
+
+      {leadId && <LeadActivityLog leadId={leadId} />}
     </div>
   )
 }
