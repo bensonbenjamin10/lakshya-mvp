@@ -8,7 +8,7 @@ interface UseAutoSaveOptions {
 }
 
 export function useAutoSave({ data, key, enabled = true, debounceMs = 1000 }: UseAutoSaveOptions) {
-  const timeoutRef = useRef<NodeJS.Timeout>()
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
   const lastSavedRef = useRef<string>('')
 
   useEffect(() => {

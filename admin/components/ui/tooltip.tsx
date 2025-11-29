@@ -12,7 +12,7 @@ export interface TooltipProps {
 
 export function Tooltip({ children, content, side = 'top', delayDuration = 200 }: TooltipProps) {
   const [isVisible, setIsVisible] = React.useState(false)
-  const timeoutRef = React.useRef<NodeJS.Timeout>()
+  const timeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined)
 
   const showTooltip = () => {
     if (timeoutRef.current) {

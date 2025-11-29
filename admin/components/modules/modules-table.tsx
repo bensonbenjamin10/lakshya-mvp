@@ -32,7 +32,7 @@ export function ModulesTable() {
       .then(({ data }) => {
         if (data) {
           const courseMap: Record<string, string> = {}
-          data.forEach((course) => {
+          data.forEach((course: any) => {
             courseMap[course.id] = course.title
           })
           setCourses(courseMap)

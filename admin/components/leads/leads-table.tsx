@@ -44,24 +44,26 @@ export function LeadsTable({ filters }: LeadsTableProps) {
     filters: [
       ...(filters.status ? [{ field: 'status', operator: 'eq' as const, value: filters.status }] : []),
       ...(filters.source ? [{ field: 'source', operator: 'eq' as const, value: filters.source }] : []),
-      ...(filters.assignedTo === 'unassigned' ? [{ field: 'assigned_to', operator: 'null' as const }] : []),
+      ...(filters.assignedTo === 'unassigned' ? [{ field: 'assigned_to', operator: 'null' as const, value: null }] : []),
       ...(filters.assignedTo && filters.assignedTo !== 'unassigned' ? [{ field: 'assigned_to', operator: 'eq' as const, value: filters.assignedTo }] : []),
     ],
     sorters: [{ field: 'created_at', order: 'desc' as const }],
-    pagination: {
-      current: currentPage,
-      pageSize: pageSize,
-    },
   })
 
   const allLeads = (listResult.result?.data || []) as any[]
   const isLoading = listResult.query?.isLoading || false
-  const total = listResult.result?.total || 0
+  
+  // Client-side pagination
+  const total = allLeads.length
   const totalPages = Math.ceil(total / pageSize)
+  const paginatedLeads = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return allLeads.slice(start, start + pageSize)
+  }, [allLeads, currentPage, pageSize])
 
   const leads = useMemo(() => {
-    if (!sortField) return allLeads
-    return [...allLeads].sort((a, b) => {
+    if (!sortField) return paginatedLeads
+    return [...paginatedLeads].sort((a, b) => {
       let aVal = a[sortField]
       let bVal = b[sortField]
 
@@ -111,7 +113,7 @@ export function LeadsTable({ filters }: LeadsTableProps) {
 
       if (profilesData) {
         const profilesMap = new Map<string, Profile>()
-        profilesData.forEach((profile) => {
+        profilesData.forEach((profile: any) => {
           profilesMap.set(profile.id, profile as Profile)
         })
         setProfiles(profilesMap)
@@ -168,7 +170,7 @@ export function LeadsTable({ filters }: LeadsTableProps) {
     )
   }
 
-  const handleExport = async (format: 'csv' | 'excel') => {
+  const handleExport = async (exportFormat: 'csv' | 'excel') => {
     try {
       const exportData = leads.map((lead) => ({
         Name: lead.name,
@@ -182,7 +184,7 @@ export function LeadsTable({ filters }: LeadsTableProps) {
         'Created At': lead.created_at ? format(new Date(lead.created_at), 'MMM dd, yyyy') : 'N/A',
       }))
 
-      if (format === 'csv') {
+      if (exportFormat === 'csv') {
         exportToCSV(exportData, 'leads')
         toast.success('Leads exported to CSV')
       } else {

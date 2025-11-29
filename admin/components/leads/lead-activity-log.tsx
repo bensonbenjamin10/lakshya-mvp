@@ -39,7 +39,7 @@ export function LeadActivityLog({ leadId }: LeadActivityLogProps) {
 
         // Load profile names for created_by
         const userIds = activitiesData
-          .map((a) => a.created_by)
+          .map((a: any) => a.created_by)
           .filter((id): id is string => id !== null)
 
         if (userIds.length > 0) {
@@ -50,7 +50,7 @@ export function LeadActivityLog({ leadId }: LeadActivityLogProps) {
 
           if (profilesData) {
             const profilesMap = new Map<string, Profile>()
-            profilesData.forEach((profile) => {
+            profilesData.forEach((profile: any) => {
               profilesMap.set(profile.id, profile as Profile)
             })
             setProfiles(profilesMap)
@@ -144,7 +144,7 @@ export function LeadActivityLog({ leadId }: LeadActivityLogProps) {
                   <div className="flex items-center justify-between">
                     <p className="font-medium text-sm">{activity.description || activity.activity_type}</p>
                     <span className="text-xs text-gray-500">
-                      {format(new Date(activity.created_at), 'MMM dd, yyyy HH:mm')}
+                      {activity.created_at ? format(new Date(activity.created_at), 'MMM dd, yyyy HH:mm') : 'N/A'}
                     </span>
                   </div>
                   {activity.old_value && activity.new_value && (

@@ -79,17 +79,6 @@ export function RefineProvider({ children }: { children: React.ReactNode }) {
       warnWhenUnsavedChanges: true,
       projectId: 'lakshya-admin',
     }}
-    queryOptions={{
-      defaultOptions: {
-        queries: {
-          staleTime: 5 * 60 * 1000, // 5 minutes
-          cacheTime: 10 * 60 * 1000, // 10 minutes
-          refetchOnWindowFocus: false,
-          refetchOnMount: false,
-          retry: 1,
-        },
-      },
-    }}
     >
       {children}
     </Refine>

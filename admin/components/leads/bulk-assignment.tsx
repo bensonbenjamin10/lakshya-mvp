@@ -49,7 +49,7 @@ export function BulkAssignment({ selectedLeadIds, onComplete }: BulkAssignmentPr
         updated_at: new Date().toISOString(),
       }
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('leads')
         .update(updateData)
         .in('id', selectedLeadIds)

@@ -32,14 +32,14 @@ export function EnrollmentsTable() {
     ]).then(([coursesData, studentsData]) => {
       if (coursesData.data) {
         const courseMap: Record<string, string> = {}
-        coursesData.data.forEach((course) => {
+        coursesData.data?.forEach((course: any) => {
           courseMap[course.id] = course.title
         })
         setCourses(courseMap)
       }
       if (studentsData.data) {
         const studentMap: Record<string, string> = {}
-        studentsData.data.forEach((student) => {
+        studentsData.data.forEach((student: any) => {
           studentMap[student.id] = student.full_name || student.email
         })
         setStudents(studentMap)
