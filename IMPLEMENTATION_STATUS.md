@@ -129,13 +129,72 @@
 - ✅ Brochure (PDF) uploads via StorageService
 - ✅ URL fallback for manual entry
 
+## Phase 4: Remaining Features
+
+### 4.1 Video Widgets Database Integration ✅ COMPLETED
+- ✅ `VideoPromoSection` widget uses `VideoPromoProvider` to load videos from database
+- ✅ Videos loaded from `video_promos` table via `VideoPromoRepository`
+- ✅ Used in `home_screen.dart` and `course_detail_screen.dart`
+- ✅ No hardcoded video values - all videos come from database
+- ✅ Supports featured videos, video types, and display ordering
+
+### 4.2 Lead Assignment Functionality ✅ COMPLETED
+- ✅ Database schema includes `assigned_to` field (references profiles.id)
+- ✅ Lead model includes `assignedTo` field
+- ✅ `LeadRepository` has `getAssignedTo()` method to query assigned leads
+- ✅ `LeadProvider` has `getAssignedLeads()` method
+- ✅ `LeadProvider` has `updateLeadAssignment()` method
+- ✅ Database index created on `assigned_to` field
+- ✅ Admin UI includes dropdown to assign/unassign leads
+- ✅ Dropdown shows all admin and faculty members
+- ✅ Assignment updates are saved to database
+
+### 4.3 Notes/Activity Tracking ✅ COMPLETED
+- ✅ Database schema includes `notes` field (text)
+- ✅ Lead model includes `notes` field
+- ✅ Admin dashboard displays notes in lead detail page
+- ✅ Admin UI includes textarea editor to edit/add notes
+- ✅ Notes updates are saved to database
+- ✅ `LeadProvider` has `updateLeadNotes()` method
+- ⚠️ **Future Enhancement**: Activity log/history tracking (separate table would be needed)
+
+### 4.4 Storage Buckets ✅ DOCUMENTED
+- ✅ `StorageService` implemented with bucket operations
+- ✅ Expected buckets defined:
+  - `avatars` - User profile avatars
+  - `brochures` - Course brochure PDFs
+  - `course-images` - Course image uploads
+- ✅ Created migration file `004_create_storage_buckets.sql` with detailed instructions
+- ✅ Documented storage policies (RLS) for each bucket
+- ⚠️ **Manual Step Required**: Storage buckets need to be created manually in Supabase Dashboard
+- ⚠️ **Manual Step Required**: Storage policies need to be configured using the documented policies
+
 ## Next Steps
 
-### Phase 4: Remaining Features
-- [ ] Update video widgets to use database instead of hardcoded values
-- [ ] Add lead assignment functionality
-- [ ] Add notes/activity tracking for leads
-- [ ] Create storage buckets in Supabase Dashboard
+### Immediate Actions Required
+1. **Create Storage Buckets in Supabase Dashboard**:
+   - Follow instructions in `supabase/migrations/004_create_storage_buckets.sql`
+   - Create `avatars` bucket (public)
+   - Create `brochures` bucket (public)
+   - Create `course-images` bucket (public)
+   - Configure storage policies as documented in the migration file
+
+### Optional Enhancements
+1. **Activity Tracking**:
+   - Create `lead_activities` table for activity tracking
+   - Add activity log UI showing lead history (status changes, assignments, notes updates)
+   - Track who made changes and when
+
+2. **Lead Management Enhancements**:
+   - Add "Assign to" column/filter in leads list view
+   - Add bulk assignment functionality
+   - Add lead status change history
+   - Add email notifications for assigned leads
+
+3. **Reporting & Analytics**:
+   - Lead assignment reports
+   - Conversion rates by assigned faculty
+   - Response time metrics
 
 ### Important Notes
 

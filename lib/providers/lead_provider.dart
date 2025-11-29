@@ -173,6 +173,96 @@ class LeadProvider with ChangeNotifier {
     }
   }
 
+  /// Update lead assignment
+  Future<bool> updateLeadAssignment(String leadId, String? assignedToUserId) async {
+    try {
+      final lead = _leads.firstWhere((l) => l.id == leadId);
+      final updatedLead = Lead(
+        id: lead.id,
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        country: lead.country,
+        inquiryType: lead.inquiryType,
+        courseId: lead.courseId,
+        message: lead.message,
+        source: lead.source,
+        createdAt: lead.createdAt,
+        updatedAt: DateTime.now(),
+        status: lead.status,
+        assignedTo: assignedToUserId,
+        notes: lead.notes,
+      );
+
+      await _repository.update(updatedLead);
+      final index = _leads.indexWhere((l) => l.id == leadId);
+      if (index != -1) {
+        _leads[index] = updatedLead;
+        notifyListeners();
+      }
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('Error updating lead assignment: $e');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Update lead notes
+  Future<bool> updateLeadNotes(String leadId, String? notes) async {
+    try {
+      final lead = _leads.firstWhere((l) => l.id == leadId);
+      final updatedLead = Lead(
+        id: lead.id,
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        country: lead.country,
+        inquiryType: lead.inquiryType,
+        courseId: lead.courseId,
+        message: lead.message,
+        source: lead.source,
+        createdAt: lead.createdAt,
+        updatedAt: DateTime.now(),
+        status: lead.status,
+        assignedTo: lead.assignedTo,
+        notes: notes,
+      );
+
+      await _repository.update(updatedLead);
+      final index = _leads.indexWhere((l) => l.id == leadId);
+      if (index != -1) {
+        _leads[index] = updatedLead;
+        notifyListeners();
+      }
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('Error updating lead notes: $e');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Update lead (general update method)
+  Future<bool> updateLead(Lead updatedLead) async {
+    try {
+      await _repository.update(updatedLead);
+      final index = _leads.indexWhere((l) => l.id == updatedLead.id);
+      if (index != -1) {
+        _leads[index] = updatedLead;
+        notifyListeners();
+      }
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('Error updating lead: $e');
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Clear error
   void clearError() {
     _error = null;
