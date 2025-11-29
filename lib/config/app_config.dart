@@ -31,6 +31,29 @@ class AppConfig {
   // ============================================
   
   static const String websiteUrl = 'https://lakshyainstitute.com';
+  
+  // ============================================
+  // AUTHENTICATION REDIRECT URLS
+  // ============================================
+  
+  /// Production app URL for email confirmations and password resets
+  static const String productionAppUrl = 'https://paperlms-001.web.app';
+  
+  /// Development/local URL (for local testing)
+  static const String localAppUrl = 'http://localhost:3000';
+  
+  /// Get the appropriate redirect URL based on environment
+  /// On web, uses production URL; can be overridden with environment variables
+  static String get authRedirectUrl {
+    // Check for environment variable override
+    const envUrl = String.fromEnvironment('AUTH_REDIRECT_URL');
+    if (envUrl.isNotEmpty) {
+      return envUrl;
+    }
+    // Default to production URL
+    return productionAppUrl;
+  }
+  
   // Add more social links as needed
   // static const String instagramUrl = '';
   // static const String linkedInUrl = '';

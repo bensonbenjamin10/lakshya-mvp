@@ -24,21 +24,25 @@ class AppRouter {
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    // On web: use browser URL (allows direct /login, /admin navigation)
-    // On mobile: start with splash screen
-    initialLocation: kIsWeb ? '/' : '/splash',
+    // CRITICAL: On web, don't set initialLocation - GoRouter will read browser URL automatically
+    // On mobile, set to splash screen
+    // When initialLocation is null/not set on web, GoRouter uses window.location.pathname
+    initialLocation: kIsWeb ? (Uri.base.path.isEmpty ? '/' : Uri.base.path) : '/splash',
     observers: [
       if (AnalyticsService.observer != null) AnalyticsService.observer!,
     ],
     onException: (context, state, exception) {
       debugPrint('GoRouter exception: $exception');
+      debugPrint('Failed route: ${state.uri}');
     },
     redirect: (context, state) {
-      // On mobile, redirect root to splash screen
+      // On mobile only: redirect root to splash screen
+      // On web: respect browser URL (don't redirect, allow /login, /admin, etc.)
       if (!kIsWeb && state.uri.path == '/') {
         return '/splash';
       }
-      return null; // No redirect needed
+      // Allow all other routes to proceed normally
+      return null;
     },
     routes: [
       // Splash Screen with fade transition

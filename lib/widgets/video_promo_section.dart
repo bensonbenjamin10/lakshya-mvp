@@ -1,152 +1,130 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
 import 'package:lakshya_mvp/widgets/vimeo_player.dart';
 import 'package:lakshya_mvp/services/analytics_service.dart';
-
-/// Video data model for promos
-class VideoPromo {
-  final String id;
-  final String vimeoId;
-  final String title;
-  final String? subtitle;
-  final String? thumbnailUrl;
-  final String? duration;
-  final VideoPromoType type;
-
-  const VideoPromo({
-    required this.id,
-    required this.vimeoId,
-    required this.title,
-    this.subtitle,
-    this.thumbnailUrl,
-    this.duration,
-    this.type = VideoPromoType.promo,
-  });
-}
-
-enum VideoPromoType {
-  welcome,
-  promo,
-  coursePreview,
-  testimonial,
-  faculty,
-}
+import 'package:lakshya_mvp/providers/video_promo_provider.dart';
+import 'package:lakshya_mvp/models/video_promo.dart';
 
 /// Video Promo Section for Home Screen
 class VideoPromoSection extends StatelessWidget {
   const VideoPromoSection({super.key});
 
-  // Sample video promos - replace with actual Vimeo IDs
-  static const List<VideoPromo> _promos = [
-    VideoPromo(
-      id: '1',
-      vimeoId: '824804225', // Replace with actual Vimeo ID
-      title: 'Welcome to Lakshya',
-      subtitle: 'Your journey to success starts here',
-      duration: '2:30',
-      type: VideoPromoType.welcome,
-    ),
-    VideoPromo(
-      id: '2',
-      vimeoId: '824804225', // Replace with actual Vimeo ID
-      title: 'Why Choose Lakshya?',
-      subtitle: 'Excellence in commerce education',
-      duration: '1:45',
-      type: VideoPromoType.promo,
-    ),
-    VideoPromo(
-      id: '3',
-      vimeoId: '824804225', // Replace with actual Vimeo ID
-      title: 'Student Success Stories',
-      subtitle: 'Hear from our alumni',
-      duration: '3:15',
-      type: VideoPromoType.testimonial,
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section Header
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Consumer<VideoPromoProvider>(
+      builder: (context, videoProvider, child) {
+        if (videoProvider.isLoading) {
+          return const SizedBox(
+            height: 200,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (videoProvider.error != null) {
+          return const SizedBox.shrink(); // Hide section on error
+        }
+
+        final videos = videoProvider.videos;
+        if (videos.isEmpty) {
+          return const SizedBox.shrink(); // Hide section if no videos
+        }
+
+        // Get featured video or first video
+        final featuredVideo = videos.firstWhere(
+          (v) => v.isFeatured,
+          orElse: () => videos.first,
+        );
+
+        // Get other videos (excluding featured)
+        final otherVideos = videos
+            .where((v) => v.id != featuredVideo.id)
+            .take(3)
+            .toList();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Section Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(AppSpacing.sm),
-                        decoration: BoxDecoration(
-                          color: AppColors.vivaMagenta.withValues(alpha: 0.1),
-                          borderRadius: AppSpacing.borderRadiusSm,
-                        ),
-                        child: const Icon(
-                          Icons.play_circle_filled_rounded,
-                          color: AppColors.vivaMagenta,
-                          size: AppSpacing.iconSm,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Text(
-                        'See Inside Lakshya',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(AppSpacing.sm),
+                            decoration: BoxDecoration(
+                              color: AppColors.vivaMagenta.withValues(alpha: 0.1),
+                              borderRadius: AppSpacing.borderRadiusSm,
                             ),
+                            child: const Icon(
+                              Icons.play_circle_filled_rounded,
+                              color: AppColors.vivaMagenta,
+                              size: AppSpacing.iconSm,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Text(
+                            'See Inside Lakshya',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 44),
+                        child: Text(
+                          'Campus tours, faculty intros & more',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.neutral500,
+                              ),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 44),
-                    child: Text(
-                      'Campus tours, faculty intros & more',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.neutral500,
-                          ),
-                    ),
-                  ),
                 ],
               ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: AppSpacing.lg),
-
-        // Featured Video (First one, larger)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
-          child: _FeaturedVideoCard(video: _promos.first),
-        ),
-
-        const SizedBox(height: AppSpacing.lg),
-
-        // Other Videos (Horizontal scroll)
-        if (_promos.length > 1)
-          SizedBox(
-            height: 140,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
-              itemCount: _promos.length - 1,
-              itemBuilder: (context, index) {
-                final video = _promos[index + 1];
-                return Padding(
-                  padding: EdgeInsets.only(
-                    right: index < _promos.length - 2 ? AppSpacing.md : 0,
-                  ),
-                  child: _SmallVideoCard(video: video),
-                );
-              },
             ),
-          ),
-      ],
+
+            const SizedBox(height: AppSpacing.lg),
+
+            // Featured Video (First one, larger)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
+              child: _FeaturedVideoCard(video: featuredVideo),
+            ),
+
+            const SizedBox(height: AppSpacing.lg),
+
+            // Other Videos (Horizontal scroll)
+            if (otherVideos.isNotEmpty)
+              SizedBox(
+                height: 140,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
+                  itemCount: otherVideos.length,
+                  itemBuilder: (context, index) {
+                    final video = otherVideos[index];
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        right: index < otherVideos.length - 1 ? AppSpacing.md : 0,
+                      ),
+                      child: _SmallVideoCard(video: video),
+                    );
+                  },
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

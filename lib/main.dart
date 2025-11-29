@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:lakshya_mvp/config/supabase_config.dart';
+import 'package:go_router/go_router.dart' show GoRouter;
 import 'package:lakshya_mvp/core/repositories/lead_repository.dart';
 import 'package:lakshya_mvp/core/repositories/course_repository.dart';
 import 'package:lakshya_mvp/core/repositories/video_promo_repository.dart';
@@ -20,6 +22,11 @@ import 'package:lakshya_mvp/theme/theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Configure URL strategy for web (allows /login, /admin, etc. to work)
+  if (kIsWeb) {
+    GoRouter.optionURLReflectsImperativeAPIs = true;
+  }
   
   // Initialize Firebase (must be before Supabase)
   // For web, Firebase will use default app if configured via Firebase Console

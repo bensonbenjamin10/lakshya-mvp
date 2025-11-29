@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lakshya_mvp/config/app_config.dart';
 
 /// Authentication service following SOLID principles
 /// 
@@ -8,6 +9,9 @@ class AuthService {
   final SupabaseClient _client;
 
   AuthService(this._client);
+  
+  /// Get redirect URL for email confirmations and password resets
+  String get _redirectUrl => AppConfig.authRedirectUrl;
 
   User? get currentUser => _client.auth.currentUser;
 
@@ -39,6 +43,7 @@ class AuthService {
         email: email,
         password: password,
         data: data,
+        emailRedirectTo: _redirectUrl,
       );
     } catch (e) {
       throw Exception('Failed to sign up: $e');
@@ -57,7 +62,10 @@ class AuthService {
   /// Reset password
   Future<void> resetPassword(String email) async {
     try {
-      await _client.auth.resetPasswordForEmail(email);
+      await _client.auth.resetPasswordForEmail(
+        email,
+        redirectTo: _redirectUrl,
+      );
     } catch (e) {
       throw Exception('Failed to reset password: $e');
     }

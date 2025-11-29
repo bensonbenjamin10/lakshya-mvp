@@ -9,6 +9,8 @@ import 'package:lakshya_mvp/widgets/lead_form_dialog.dart';
 import 'package:lakshya_mvp/widgets/vimeo_player.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
 import 'package:lakshya_mvp/services/analytics_service.dart';
+import 'package:lakshya_mvp/providers/video_promo_provider.dart';
+import 'package:lakshya_mvp/models/video_promo.dart';
 
 class CourseDetailScreen extends StatefulWidget {
   final String courseId;
@@ -258,6 +260,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                   _CourseVideoPreview(
                     courseColor: courseColor,
                     courseCategory: course.category,
+                    courseId: course.id,
                   ),
 
                   // About Section
@@ -739,75 +742,85 @@ class _BottomActionBar extends StatelessWidget {
 class _CourseVideoPreview extends StatelessWidget {
   final Color courseColor;
   final CourseCategory courseCategory;
+  final String? courseId;
 
   const _CourseVideoPreview({
     required this.courseColor,
     required this.courseCategory,
+    this.courseId,
   });
-
-  // Sample Vimeo IDs for each course - replace with actual IDs
-  String get _vimeoId {
-    switch (courseCategory) {
-      case CourseCategory.acca:
-        return '824804225'; // Replace with ACCA course preview
-      case CourseCategory.ca:
-        return '824804225'; // Replace with CA course preview
-      case CourseCategory.cma:
-        return '824804225'; // Replace with CMA course preview
-      case CourseCategory.bcomMba:
-        return '824804225'; // Replace with B.Com MBA preview
-    }
-  }
-
-  String get _videoTitle {
-    switch (courseCategory) {
-      case CourseCategory.acca:
-        return 'ACCA Course Overview';
-      case CourseCategory.ca:
-        return 'CA Program Introduction';
-      case CourseCategory.cma:
-        return 'CMA (US) Course Preview';
-      case CourseCategory.bcomMba:
-        return 'B.Com & MBA Program';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.screenPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Section Header
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: courseColor.withValues(alpha: 0.1),
-                  borderRadius: AppSpacing.borderRadiusSm,
-                ),
-                child: Icon(
-                  Icons.play_circle_outline_rounded,
-                  size: AppSpacing.iconSm,
-                  color: courseColor,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Text(
-                'Course Preview',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
+    return Consumer<VideoPromoProvider>(
+      builder: (context, videoProvider, child) {
+        // Find course preview video for this course
+        if (videoProvider.videos.isEmpty) {
+          return const SizedBox.shrink();
+        }
 
-          // Video Thumbnail
-          GestureDetector(
-            onTap: () => _openVideoPlayer(context),
+        VideoPromo video;
+        try {
+          if (courseId != null) {
+            video = videoProvider.videos.firstWhere(
+              (v) => v.courseId == courseId && v.type == VideoPromoType.coursePreview,
+            );
+          } else {
+            throw Exception('No course ID');
+          }
+        } catch (_) {
+          // No course-specific video found, try course preview type
+          try {
+            video = videoProvider.videos.firstWhere(
+              (v) => v.type == VideoPromoType.coursePreview,
+            );
+          } catch (_) {
+            // No course preview videos, use first video
+            video = videoProvider.videos.first;
+          }
+        }
+
+        return Padding(
+          padding: const EdgeInsets.all(AppSpacing.screenPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Section Header
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: courseColor.withValues(alpha: 0.1),
+                      borderRadius: AppSpacing.borderRadiusSm,
+                    ),
+                    child: Icon(
+                      Icons.play_circle_outline_rounded,
+                      size: AppSpacing.iconSm,
+                      color: courseColor,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Text(
+                    'Course Preview',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
+              // Video Thumbnail
+              GestureDetector(
+                onTap: () {
+                  // Log analytics event
+                  AnalyticsService.logVideoPlay(
+                    videoId: video.vimeoId,
+                    videoTitle: video.title,
+                  );
+                  _openVideoPlayer(context, video);
+                },
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: AppSpacing.borderRadiusLg,
@@ -914,7 +927,7 @@ class _CourseVideoPreview extends StatelessWidget {
 
                             // Title
                             Text(
-                              _videoTitle,
+                              video.title,
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
@@ -945,7 +958,7 @@ class _CourseVideoPreview extends StatelessWidget {
                             borderRadius: AppSpacing.borderRadiusSm,
                           ),
                           child: Text(
-                            '3:45',
+                            video.duration ?? '--:--',
                             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
@@ -966,7 +979,14 @@ class _CourseVideoPreview extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () => _openVideoPlayer(context),
+                onPressed: () {
+                // Log analytics event
+                AnalyticsService.logVideoPlay(
+                  videoId: video.vimeoId,
+                  videoTitle: video.title,
+                );
+                _openVideoPlayer(context, video);
+              },
               icon: const Icon(Icons.play_circle_outline_rounded, size: 20),
               label: const Text('Watch Course Introduction'),
               style: OutlinedButton.styleFrom(
@@ -982,16 +1002,24 @@ class _CourseVideoPreview extends StatelessWidget {
         ],
       ),
     );
+      },
+    );
   }
 
-  void _openVideoPlayer(BuildContext context) {
+  void _openVideoPlayer(BuildContext context, VideoPromo video) {
+    // Log analytics event
+    AnalyticsService.logVideoPlay(
+      videoId: video.vimeoId,
+      videoTitle: video.title,
+    );
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => VideoPlayerModal(
-        videoId: _vimeoId,
-        title: _videoTitle,
+        videoId: video.vimeoId,
+        title: video.title,
       ),
     );
   }

@@ -225,9 +225,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Wrap(
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.md,
+          Row(
             children: [
               Expanded(
                 child: _QuickAccessCard(
@@ -236,6 +234,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   onTap: () => context.go('/admin/courses'),
                 ),
               ),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: _QuickAccessCard(
                   icon: Icons.people_rounded,
@@ -243,6 +242,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   onTap: () => context.go('/admin/leads'),
                 ),
               ),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: _QuickAccessCard(
                   icon: Icons.video_library_rounded,

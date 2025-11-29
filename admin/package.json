@@ -1,0 +1,44 @@
+{
+  "name": "admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "eslint",
+    "generate:types": "supabase gen types typescript --project-id spzcjpvtikyoykbgnlgr > lib/types/database.types.ts"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.9.1",
+    "@refinedev/core": "^4.45.0",
+    "@refinedev/react-hook-form": "^4.8.0",
+    "@refinedev/react-table": "^5.6.0",
+    "@refinedev/supabase": "^4.5.0",
+    "@supabase/ssr": "^0.5.1",
+    "@supabase/supabase-js": "^2.39.8",
+    "@tanstack/react-query": "^5.59.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "lucide-react": "^0.441.0",
+    "next": "16.0.5",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-hook-form": "^7.53.0",
+    "recharts": "^2.12.7",
+    "tailwind-merge": "^2.5.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.5",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
