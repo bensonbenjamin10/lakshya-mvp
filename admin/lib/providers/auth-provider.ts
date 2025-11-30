@@ -22,6 +22,9 @@ export const authProvider: AuthProvider = {
       }
     }
 
+    // Wait for session to be fully established
+    await new Promise(resolve => setTimeout(resolve, 100))
+
     // Check if user has admin role
     const { data: profile } = await supabase
       .from('profiles')
@@ -38,6 +41,18 @@ export const authProvider: AuthProvider = {
         error: {
           message: 'Access denied. Admin role required.',
           name: 'AccessDenied',
+        },
+      }
+    }
+
+    // Verify session is still valid after role check
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData?.session) {
+      return {
+        success: false,
+        error: {
+          message: 'Session not established. Please try again.',
+          name: 'SessionError',
         },
       }
     }

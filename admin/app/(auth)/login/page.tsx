@@ -11,17 +11,29 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
-    login(
-      { email, password },
-      {
-        onError: (error) => {
-          setError(error.message || 'Login failed')
-        },
-      }
-    )
+    
+    try {
+      const result = await login(
+        { email, password },
+        {
+          onSuccess: () => {
+            // Wait a bit for cookies to be set, then redirect
+            setTimeout(() => {
+              // Force a hard navigation to ensure cookies are properly set
+              window.location.href = '/'
+            }, 100)
+          },
+          onError: (error) => {
+            setError(error.message || 'Login failed')
+          },
+        }
+      )
+    } catch (err: any) {
+      setError(err?.message || 'Login failed')
+    }
   }
 
   return (
