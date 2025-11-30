@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:lakshya_mvp/config/supabase_config.dart';
+import 'package:lakshya_mvp/firebase_options.dart';
 import 'package:go_router/go_router.dart' show GoRouter;
 import 'package:lakshya_mvp/core/repositories/lead_repository.dart';
 import 'package:lakshya_mvp/core/repositories/course_repository.dart';
@@ -37,15 +38,16 @@ Future<void> main() async {
   }
   
   // Initialize Firebase (must be before Supabase)
-  // For web, Firebase will use default app if configured via Firebase Console
-  // For mobile, platform-specific configuration files are needed
+  // Using FlutterFire CLI generated options for platform-specific configuration
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     await AnalyticsService.initialize();
   } catch (e) {
     debugPrint('Firebase initialization error: $e');
     debugPrint('Continuing without Firebase Analytics...');
-    // Continue without Firebase if initialization fails (e.g., not configured yet)
+    // Continue without Firebase if initialization fails
   }
   
   // Initialize Supabase

@@ -42,7 +42,34 @@ const firebaseConfig = {
 };
 ```
 
-## Step 4: Configure Firebase in Flutter
+## Step 4: Configure Firebase for Android
+
+**Note**: The app will work without Firebase on Android. Firebase Analytics is optional and will be skipped if not configured.
+
+To enable Firebase Analytics on Android:
+
+1. In Firebase Console > Project Settings > General
+2. Scroll to "Your apps" section
+3. If you don't have an Android app yet, click the Android icon to add one
+4. Enter your package name: `com.lakshya.lakshya_mvp`
+5. Download the `google-services.json` file
+6. Place it in `android/app/google-services.json`
+7. Update `android/build.gradle.kts` to include the Google Services plugin:
+   ```kotlin
+   buildscript {
+       dependencies {
+           classpath("com.google.gms:google-services:4.4.0")
+       }
+   }
+   ```
+8. Update `android/app/build.gradle.kts` to apply the plugin:
+   ```kotlin
+   plugins {
+       id("com.google.gms.google-services")
+   }
+   ```
+
+## Step 5: Configure Firebase for Web
 
 For Flutter web, Firebase can be initialized automatically if you have the Firebase SDK scripts in `web/index.html`. However, for better control, you can:
 
@@ -62,13 +89,13 @@ flutter build web --release \
 
 Update `lib/config/firebase_config.dart` with default values (not recommended for production, but fine for testing).
 
-## Step 5: Enable Firebase Hosting
+## Step 6: Enable Firebase Hosting
 
 1. In Firebase Console, go to "Hosting" in the left sidebar
 2. Click "Get started"
 3. Follow the setup wizard (we already have `firebase.json` configured)
 
-## Step 6: Deploy
+## Step 7: Deploy
 
 Once configured, deploy using:
 ```powershell
@@ -86,4 +113,9 @@ firebase deploy --only hosting
 - **Project ID not found**: Make sure you're logged in with `firebase login`
 - **Hosting not enabled**: Enable it in Firebase Console > Hosting
 - **Analytics not working**: Make sure Analytics is enabled in Firebase Console and you have the measurement ID configured
+- **Android Firebase error**: If you see "Failed to load FirebaseOptions from resource", make sure:
+  - `google-services.json` exists in `android/app/`
+  - Google Services plugin is applied in both `android/build.gradle.kts` and `android/app/build.gradle.kts`
+  - The package name in `google-services.json` matches your app's package name (`com.lakshya.lakshya_mvp`)
+- **Firebase initialization skipped**: This is normal if Firebase is not configured. The app will continue to work without Firebase Analytics.
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "925933038816",
+    "project_id": "paperlms-001",
+    "storage_bucket": "paperlms-001.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:925933038816:android:fed25a7df0473df9ba7485",
+        "android_client_info": {
+          "package_name": "com.lakshya.lakshya_mvp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJq1xNgcUN6qmOzMj16EZPO_tCH8ZXsyw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
