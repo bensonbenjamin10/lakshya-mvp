@@ -2,11 +2,18 @@
 
 import { useState, useEffect } from 'react'
 import { useForm } from '@refinedev/react-hook-form'
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/client'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useRouter } from 'next/navigation'
+
+// Dynamic import for Markdown editor (SSR-safe)
+const MDEditor = dynamic(
+  () => import('@uiw/react-md-editor'),
+  { ssr: false }
+)
 
 interface ModuleFormProps {
   moduleId?: string
@@ -16,6 +23,7 @@ export function ModuleForm({ moduleId }: ModuleFormProps) {
   const toast = useToast()
   const router = useRouter()
   const [courses, setCourses] = useState<any[]>([])
+  const [contentBody, setContentBody] = useState<string>('')
   const supabase = createClient()
 
   useEffect(() => {
@@ -45,8 +53,35 @@ export function ModuleForm({ moduleId }: ModuleFormProps) {
 
   const courseId = watch('course_id')
   const type = watch('type')
+  const contentType = watch('content_type')
   const isRequired = watch('is_required')
   const unlockDate = watch('unlock_date')
+
+  // Load existing content_body when editing
+  useEffect(() => {
+    if (moduleId) {
+      supabase
+        .from('course_modules')
+        .select('content_body, content_type')
+        .eq('id', moduleId)
+        .single()
+        .then(({ data }) => {
+          if (data?.content_body) {
+            setContentBody(data.content_body)
+          }
+          if (data?.content_type) {
+            setValue('content_type', data.content_type)
+          }
+        })
+    }
+  }, [moduleId, setValue, supabase])
+
+  // Set default content_type for reading modules
+  useEffect(() => {
+    if (type === 'reading' && !contentType) {
+      setValue('content_type', 'markdown')
+    }
+  }, [type, contentType, setValue])
 
   const onSubmit = async (data: any) => {
     try {
@@ -57,6 +92,9 @@ export function ModuleForm({ moduleId }: ModuleFormProps) {
         display_order: data.display_order ? parseInt(data.display_order) : 0,
         is_required: isRequired !== undefined ? isRequired : true,
         unlock_date: unlockDate || null,
+        // Include content body and type for reading modules
+        content_body: type === 'reading' && contentType === 'markdown' ? contentBody : null,
+        content_type: type === 'reading' ? (data.content_type || 'url') : 'url',
       }
 
       await onFinish(submitData)
@@ -177,17 +215,60 @@ export function ModuleForm({ moduleId }: ModuleFormProps) {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Content URL
-            </label>
-            <input
-              type="url"
-              {...register('content_url')}
-              placeholder="https://example.com/video"
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-            />
-          </div>
+          {/* Content Type Selection (show for reading modules) */}
+          {type === 'reading' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Content Type
+              </label>
+              <select
+                {...register('content_type')}
+                defaultValue="markdown"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+              >
+                <option value="markdown">Markdown (In-App Reader)</option>
+                <option value="url">External URL</option>
+              </select>
+              <p className="mt-1 text-xs text-gray-500">
+                Markdown content displays beautifully in the app. External URLs open in browser.
+              </p>
+            </div>
+          )}
+
+          {/* Show URL input only if content_type is 'url' or not a reading module */}
+          {(type !== 'reading' || contentType === 'url') && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Content URL
+              </label>
+              <input
+                type="url"
+                {...register('content_url')}
+                placeholder="https://example.com/video"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+              />
+            </div>
+          )}
+
+          {/* Markdown Editor (show for reading modules with markdown type) */}
+          {type === 'reading' && contentType === 'markdown' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Reading Content (Markdown)
+              </label>
+              <div data-color-mode="light" className="border rounded-md overflow-hidden">
+                <MDEditor
+                  value={contentBody}
+                  onChange={(val) => setContentBody(val || '')}
+                  height={400}
+                  preview="live"
+                />
+              </div>
+              <p className="mt-2 text-xs text-gray-500">
+                Supports headings, lists, bold, italic, code blocks, images, and tables.
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -231,4 +312,3 @@ export function ModuleForm({ moduleId }: ModuleFormProps) {
     </Card>
   )
 }
-

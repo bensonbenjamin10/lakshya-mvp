@@ -6,10 +6,17 @@ import 'package:lakshya_mvp/providers/student_provider.dart';
 import 'package:lakshya_mvp/widgets/student/video_player_widget.dart';
 import 'package:lakshya_mvp/widgets/student/assignment_submission_widget.dart';
 import 'package:lakshya_mvp/widgets/student/quiz_widget.dart';
+import 'package:lakshya_mvp/widgets/student/markdown_content_widget.dart';
 import 'package:lakshya_mvp/widgets/shared/loading_state.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
 
-/// Module detail screen showing module content based on type
+/// Module detail screen with optimized layout
+/// 
+/// Design principles:
+/// - Single source of truth for title (app bar only)
+/// - Content-first approach
+/// - Minimal chrome, maximum content
+/// - Type-specific layouts
 class ModuleDetailScreen extends StatefulWidget {
   final String courseId;
   final String moduleId;
@@ -40,14 +47,12 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
   Future<void> _loadModuleData() async {
     final studentProvider = Provider.of<StudentProvider>(context, listen: false);
     
-    // Get module from the course modules
     final modules = studentProvider.getModulesForCourse(widget.courseId);
     _module = modules.firstWhere(
       (m) => m.id == widget.moduleId,
       orElse: () => modules.first,
     );
 
-    // Get progress for this module
     _progress = studentProvider.getModuleProgress(widget.enrollmentId, widget.moduleId);
 
     setState(() {
@@ -62,7 +67,7 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
 
     final now = DateTime.now();
     final progress = _progress ?? StudentProgress(
-      id: '', // Will be created by repository
+      id: '',
       studentId: studentProvider.enrollments.first.studentId,
       enrollmentId: widget.enrollmentId,
       moduleId: widget.moduleId,
@@ -77,14 +82,10 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
       completionDate: status == ProgressStatus.completed ? now : null,
     );
 
-    // Update progress via repository
-    // Note: This would typically go through StudentProvider
-    // For now, we'll just update local state
     setState(() {
       _progress = updatedProgress;
     });
 
-    // Refresh student data to update enrollment progress
     await studentProvider.refresh();
   }
 
@@ -97,264 +98,623 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
     }
 
     if (_module == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Module Not Found')),
-        body: const Center(child: Text('Module not found')),
-      );
+      return _buildNotFoundState(context);
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_module!.title),
-        actions: [
-          if (_progress?.status == ProgressStatus.completed)
-            IconButton(
-              icon: const Icon(Icons.check_circle, color: AppColors.success),
-              tooltip: 'Completed',
-              onPressed: null,
-            ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.screenPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Module header
-            _buildModuleHeader(context),
-            const SizedBox(height: AppSpacing.xl),
+    final isCompleted = _progress?.status == ProgressStatus.completed;
 
-            // Module content based on type
-            _buildModuleContent(context),
+    return Scaffold(
+      backgroundColor: AppColors.surfaceLight,
+      appBar: _buildAppBar(context, isCompleted),
+      body: _buildContent(context),
+      // Sticky bottom action for non-video content
+      bottomNavigationBar: _module!.type != ModuleType.video
+          ? _buildBottomAction(context, isCompleted)
+          : null,
+    );
+  }
+
+  Widget _buildNotFoundState(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Not Found')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              decoration: BoxDecoration(
+                color: AppColors.neutral100,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.search_off_rounded,
+                size: 48,
+                color: AppColors.neutral400,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'Module not found',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: AppColors.neutral600,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildModuleHeader(BuildContext context) {
+  PreferredSizeWidget _buildAppBar(BuildContext context, bool isCompleted) {
+    return AppBar(
+      backgroundColor: AppColors.surfaceLight,
+      elevation: 0,
+      titleSpacing: 0,
+      title: Row(
+        children: [
+          // Module type icon
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: _getModuleColor().withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              _getModuleIcon(),
+              size: 18,
+              color: _getModuleColor(),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          // Title
+          Expanded(
+            child: Text(
+              _module!.title,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        if (isCompleted)
+          Container(
+            margin: const EdgeInsets.only(right: AppSpacing.md),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.check_rounded,
+              color: AppColors.success,
+              size: 18,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    switch (_module!.type) {
+      case ModuleType.video:
+        return _buildVideoLayout(context);
+      case ModuleType.reading:
+        return _buildReadingLayout(context);
+      case ModuleType.assignment:
+        return _buildAssignmentLayout(context);
+      case ModuleType.quiz:
+        return _buildQuizLayout(context);
+      case ModuleType.liveSession:
+        return _buildLiveSessionLayout(context);
+    }
+  }
+
+  /// Video: Player on top, then info below
+  Widget _buildVideoLayout(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Video player with padding
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenPadding,
+              0,
+              AppSpacing.screenPadding,
+              AppSpacing.lg,
+            ),
+            child: VideoPlayerWidget(
+              module: _module!,
+              progress: _progress,
+              onProgressUpdate: (status) => _updateProgress(status),
+            ),
+          ),
+          
+          // Info section
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
+            child: _buildInfoSection(context),
+          ),
+          
+          const SizedBox(height: AppSpacing.xxl),
+        ],
+      ),
+    );
+  }
+
+  /// Reading: Full-height immersive reader
+  Widget _buildReadingLayout(BuildContext context) {
+    // Check for inline markdown content
+    if (_module!.contentBody != null && _module!.contentType == ContentType.markdown) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screenPadding,
+          0,
+          AppSpacing.screenPadding,
+          0,
+        ),
+        child: MarkdownContentWidget(
+          content: _module!.contentBody!,
+          title: null, // Don't pass title to avoid duplication
+          onComplete: () {
+            if (_progress?.status != ProgressStatus.completed) {
+              _updateProgress(ProgressStatus.completed);
+              _showCompletionSnackbar(context);
+            }
+          },
+        ),
+      );
+    }
+
+    // URL-based reading with cleaner UI
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.screenPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Description (if present) - NOT the title again
+          if (_module!.description != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+              child: Text(
+                _module!.description!,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: AppColors.neutral600,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          
+          // Metadata chips
+          _buildMetadataChips(context),
+          
+          const SizedBox(height: AppSpacing.xl),
+          
+          // Reading material card
+          _buildReadingMaterialCard(context),
+        ],
+      ),
+    );
+  }
+
+  /// Assignment: Form-like layout
+  Widget _buildAssignmentLayout(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.screenPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Brief info
+          if (_module!.description != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+              child: Text(
+                _module!.description!,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: AppColors.neutral600,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          
+          _buildMetadataChips(context),
+          
+          const SizedBox(height: AppSpacing.xl),
+          
+          AssignmentSubmissionWidget(
+            module: _module!,
+            enrollmentId: widget.enrollmentId,
+            progress: _progress,
+            onSubmissionComplete: () => _updateProgress(ProgressStatus.completed),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Quiz: Clean quiz interface
+  Widget _buildQuizLayout(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.screenPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_module!.description != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+              child: Text(
+                _module!.description!,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: AppColors.neutral600,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          
+          _buildMetadataChips(context),
+          
+          const SizedBox(height: AppSpacing.xl),
+          
+          QuizWidget(
+            module: _module!,
+            enrollmentId: widget.enrollmentId,
+            progress: _progress,
+            onQuizComplete: () => _updateProgress(ProgressStatus.completed),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Live Session: Centered CTA
+  Widget _buildLiveSessionLayout(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.screenPadding),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Icon
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.ultramarine.withValues(alpha: 0.2),
+                    AppColors.ultramarine.withValues(alpha: 0.1),
+                  ],
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.videocam_rounded,
+                size: 48,
+                color: AppColors.ultramarine,
+              ),
+            ),
+            
+            const SizedBox(height: AppSpacing.xl),
+            
+            Text(
+              'Live Session',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.ultramarine,
+              ),
+            ),
+            
+            const SizedBox(height: AppSpacing.sm),
+            
+            // Schedule
+            if (_module!.unlockDate != null)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.ultramarine.withValues(alpha: 0.1),
+                  borderRadius: AppSpacing.borderRadiusSm,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.event_rounded,
+                      size: 16,
+                      color: AppColors.ultramarine,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      _formatDate(_module!.unlockDate!),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.ultramarine,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Text(
+                'Session details will be shared soon',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.neutral500,
+                ),
+              ),
+            
+            const SizedBox(height: AppSpacing.xxl),
+            
+            FilledButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Calendar invite coming soon!'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+              icon: const Icon(Icons.calendar_today_rounded),
+              label: const Text('Add to Calendar'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.ultramarine,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xxl,
+                  vertical: AppSpacing.md,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Info section for video content
+  Widget _buildInfoSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Module type badge
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          decoration: BoxDecoration(
-            color: _getModuleTypeColor().withValues(alpha: 0.1),
-            borderRadius: AppSpacing.borderRadiusSm,
-            border: Border.all(color: _getModuleTypeColor().withValues(alpha: 0.3)),
-          ),
-          child: Text(
-            _module!.type.displayName,
-            style: TextStyle(
-              color: _getModuleTypeColor(),
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-
-        // Module title
-        Text(
-          _module!.title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-
-        // Module description
+        // Description
         if (_module!.description != null)
           Text(
             _module!.description!,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.neutral600,
-                ),
-          ),
-
-        const SizedBox(height: AppSpacing.md),
-
-        // Module metadata
-        Row(
-          children: [
-            if (_module!.durationMinutes != null) ...[
-              Icon(Icons.access_time, size: 16, color: AppColors.neutral500),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                '${_module!.durationMinutes} minutes',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.neutral500,
-                    ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-            ],
-            Icon(Icons.info_outline, size: 16, color: AppColors.neutral500),
-            const SizedBox(width: AppSpacing.xs),
-            Text(
-              _module!.isRequired ? 'Required' : 'Optional',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.neutral500,
-                  ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildModuleContent(BuildContext context) {
-    switch (_module!.type) {
-      case ModuleType.video:
-        return VideoPlayerWidget(
-          module: _module!,
-          progress: _progress,
-          onProgressUpdate: (status) => _updateProgress(status),
-        );
-      case ModuleType.reading:
-        return _buildReadingContent(context);
-      case ModuleType.assignment:
-        return AssignmentSubmissionWidget(
-          module: _module!,
-          enrollmentId: widget.enrollmentId,
-          progress: _progress,
-          onSubmissionComplete: () => _updateProgress(ProgressStatus.completed),
-        );
-      case ModuleType.quiz:
-        return QuizWidget(
-          module: _module!,
-          enrollmentId: widget.enrollmentId,
-          progress: _progress,
-          onQuizComplete: () => _updateProgress(ProgressStatus.completed),
-        );
-      case ModuleType.liveSession:
-        return _buildLiveSessionContent(context);
-    }
-  }
-
-  Widget _buildReadingContent(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (_module!.contentUrl != null) ...[
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            decoration: BoxDecoration(
-              color: AppColors.neutral100,
-              borderRadius: AppSpacing.borderRadiusMd,
-              border: Border.all(color: AppColors.neutral200),
-            ),
-            child: Column(
-              children: [
-                const Icon(Icons.article, size: 48, color: AppColors.neutral400),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  'Reading Material',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextButton.icon(
-                  onPressed: () {
-                    // Open reading URL
-                    if (_module!.contentUrl != null) {
-                      // In a real app, you'd use url_launcher or similar
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Opening: ${_module!.contentUrl}'),
-                          action: SnackBarAction(
-                            label: 'Open',
-                            onPressed: () {
-                              // Launch URL
-                            },
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.open_in_new),
-                  label: const Text('Open Reading Material'),
-                ),
-              ],
+              color: AppColors.neutral600,
+              height: 1.5,
             ),
           ),
+        
+        if (_module!.description != null)
           const SizedBox(height: AppSpacing.lg),
-        ],
-        // Mark as complete button
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: () {
-              _updateProgress(ProgressStatus.completed);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Reading marked as complete!')),
-              );
-            },
-            icon: const Icon(Icons.check_circle),
-            label: const Text('Mark as Complete'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-            ),
-          ),
-        ),
+        
+        // Metadata chips
+        _buildMetadataChips(context),
       ],
     );
   }
 
-  Widget _buildLiveSessionContent(BuildContext context) {
+  /// Compact metadata chips
+  Widget _buildMetadataChips(BuildContext context) {
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: [
+        // Duration
+        if (_module!.durationMinutes != null)
+          _buildChip(
+            context,
+            Icons.schedule_rounded,
+            '${_module!.durationMinutes} min',
+          ),
+        
+        // Required/Optional
+        _buildChip(
+          context,
+          _module!.isRequired ? Icons.star_rounded : Icons.star_outline_rounded,
+          _module!.isRequired ? 'Required' : 'Optional',
+        ),
+        
+        // Free preview
+        if (_module!.isFreePreview)
+          _buildChip(
+            context,
+            Icons.lock_open_rounded,
+            'Free Preview',
+            color: AppColors.success,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildChip(
+    BuildContext context,
+    IconData icon,
+    String label, {
+    Color? color,
+  }) {
+    final chipColor = color ?? AppColors.neutral500;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: chipColor.withValues(alpha: 0.1),
+        borderRadius: AppSpacing.borderRadiusSm,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: chipColor),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: chipColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Reading material card (for URL-based content)
+  Widget _buildReadingMaterialCard(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: AppColors.ultramarine.withValues(alpha: 0.1),
-        borderRadius: AppSpacing.borderRadiusMd,
-        border: Border.all(color: AppColors.ultramarine.withValues(alpha: 0.3)),
+        color: AppColors.success.withValues(alpha: 0.05),
+        borderRadius: AppSpacing.borderRadiusLg,
+        border: Border.all(
+          color: AppColors.success.withValues(alpha: 0.2),
+        ),
       ),
       child: Column(
         children: [
-          const Icon(Icons.videocam, size: 64, color: AppColors.ultramarine),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            'Live Session',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.ultramarine,
-                ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          if (_module!.unlockDate != null)
-            Text(
-              'Scheduled for: ${_formatDate(_module!.unlockDate!)}',
-              style: Theme.of(context).textTheme.bodyMedium,
-            )
-          else
-            Text(
-              'Session details will be shared soon',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.neutral600,
-                  ),
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
             ),
+            child: const Icon(
+              Icons.auto_stories_rounded,
+              size: 40,
+              color: AppColors.success,
+            ),
+          ),
           const SizedBox(height: AppSpacing.lg),
-          ElevatedButton.icon(
+          Text(
+            'Reading Material',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Tap below to open the document',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.neutral500,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton.icon(
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Live session link will be shared via email')),
+                const SnackBar(
+                  content: Text('Opening document...'),
+                  behavior: SnackBarBehavior.floating,
+                ),
               );
             },
-            icon: const Icon(Icons.calendar_today),
-            label: const Text('View Schedule'),
+            icon: const Icon(Icons.open_in_new_rounded, size: 18),
+            label: const Text('Open Document'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.success,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xl,
+                vertical: AppSpacing.md,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Color _getModuleTypeColor() {
+  /// Sticky bottom action bar
+  Widget _buildBottomAction(BuildContext context, bool isCompleted) {
+    if (isCompleted) {
+      return Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.success.withValues(alpha: 0.1),
+          border: Border(
+            top: BorderSide(color: AppColors.success.withValues(alpha: 0.2)),
+          ),
+        ),
+        child: SafeArea(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.success,
+                size: 20,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                'Completed',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: AppColors.success,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: FilledButton.icon(
+            onPressed: () {
+              _updateProgress(ProgressStatus.completed);
+              _showCompletionSnackbar(context);
+            },
+            icon: const Icon(Icons.check_rounded, size: 20),
+            label: const Text('Mark as Complete'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.classicBlue,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showCompletionSnackbar(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+            const SizedBox(width: AppSpacing.sm),
+            Text('${_module!.type.displayName} marked as complete!'),
+          ],
+        ),
+        backgroundColor: AppColors.success,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: AppSpacing.borderRadiusSm),
+      ),
+    );
+  }
+
+  Color _getModuleColor() {
     switch (_module!.type) {
       case ModuleType.video:
         return AppColors.classicBlue;
@@ -369,8 +729,24 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
     }
   }
 
+  IconData _getModuleIcon() {
+    switch (_module!.type) {
+      case ModuleType.video:
+        return Icons.play_circle_rounded;
+      case ModuleType.reading:
+        return Icons.auto_stories_rounded;
+      case ModuleType.assignment:
+        return Icons.assignment_rounded;
+      case ModuleType.quiz:
+        return Icons.quiz_rounded;
+      case ModuleType.liveSession:
+        return Icons.videocam_rounded;
+    }
+  }
+
   String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${months[date.month - 1]} ${date.day}, ${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 }
-

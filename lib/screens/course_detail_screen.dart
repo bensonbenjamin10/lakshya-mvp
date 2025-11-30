@@ -11,6 +11,7 @@ import 'package:lakshya_mvp/widgets/lead_form_dialog.dart';
 import 'package:lakshya_mvp/widgets/vimeo_player.dart';
 import 'package:lakshya_mvp/widgets/student/enrollment_badge.dart';
 import 'package:lakshya_mvp/widgets/student/progress_indicator.dart';
+import 'package:lakshya_mvp/widgets/payment/payment_sheet.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
 import 'package:lakshya_mvp/services/analytics_service.dart';
 import 'package:lakshya_mvp/providers/video_promo_provider.dart';
@@ -247,6 +248,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
+                        const SizedBox(height: AppSpacing.md),
+                        // Pricing display
+                        _buildPricingDisplay(context, course),
                         const SizedBox(height: AppSpacing.lg),
                         // Info Chips
                         Wrap(
@@ -273,6 +277,12 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                               label: 'Certified',
                               color: AppColors.success,
                             ),
+                            if (course.hasFreeTrial)
+                              _InfoChip(
+                                icon: Icons.card_giftcard_rounded,
+                                label: '${course.freeTrialDays}-Day Free Trial',
+                                color: AppColors.mimosaGold,
+                              ),
                           ],
                         ),
                       ],
@@ -362,14 +372,85 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             course: course,
             courseColor: courseColor,
             enrollment: _enrollment,
+            onEnrollmentChanged: _checkEnrollmentStatus,
           ),
         ),
       ),
     );
   }
 
+  Widget _buildPricingDisplay(BuildContext context, Course course) {
+    if (course.isFree || course.price == 0) {
+      return Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.xs,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.1),
+              borderRadius: AppSpacing.borderRadiusFull,
+            ),
+            child: Text(
+              'FREE',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.success,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        // Effective price
+        Text(
+          course.formattedEffectivePrice,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.classicBlue,
+              ),
+        ),
+        // Original price (if on sale)
+        if (course.isOnSale) ...[
+          const SizedBox(width: AppSpacing.sm),
+          Text(
+            course.formattedPrice,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: AppColors.neutral500,
+                  decoration: TextDecoration.lineThrough,
+                ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: 2,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.1),
+              borderRadius: AppSpacing.borderRadiusFull,
+            ),
+            child: Text(
+              '${course.discountPercentage}% OFF',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.success,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _buildCTACard(BuildContext context, Course course, Color courseColor) {
     final isEnrolled = _enrollment != null && _enrollment!.status == EnrollmentStatus.active;
+    final hasFullAccess = _enrollment?.hasFullAccess ?? false;
 
     return Container(
       margin: const EdgeInsets.all(AppSpacing.screenPadding),
@@ -401,17 +482,82 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
           Text(
             isEnrolled
                 ? 'Access your course materials and continue your journey'
-                : 'Join thousands of successful students',
+                : course.hasFreeTrial
+                    ? 'Start your ${course.freeTrialDays}-day free trial today!'
+                    : 'Join thousands of successful students',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.white.withValues(alpha: 0.9),
                 ),
+            textAlign: TextAlign.center,
           ),
+          // Show trial info if not enrolled
+          if (!isEnrolled && course.hasFreeTrial) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.xs,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: AppSpacing.borderRadiusFull,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.card_giftcard,
+                    size: 14,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    'Then ${course.formattedEffectivePrice}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.white,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (isEnrolled && _enrollment != null) ...[
             const SizedBox(height: AppSpacing.md),
             ProgressIndicatorWidget(
               progress: _enrollment!.progressPercentage,
               showLabel: true,
             ),
+            // Show trial days remaining
+            if (_enrollment!.isTrialActive) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: AppSpacing.borderRadiusFull,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.access_time,
+                      size: 14,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      '${_enrollment!.trialDaysRemaining} days left in trial',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.white,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
           const SizedBox(height: AppSpacing.lg),
           SizedBox(
@@ -419,18 +565,27 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             height: AppSpacing.buttonHeightLg,
             child: ElevatedButton(
               onPressed: () {
-                if (isEnrolled) {
+                if (isEnrolled && hasFullAccess) {
                   // Navigate to course content
                   context.push('/student/courses/${course.id}/content');
+                } else if (isEnrolled && !hasFullAccess) {
+                  // Show payment sheet for upgrade
+                  PaymentSheet.show(
+                    context,
+                    course: course,
+                    enrollment: _enrollment,
+                    onPaymentSuccess: () => _checkEnrollmentStatus(),
+                    onTrialStarted: () => _checkEnrollmentStatus(),
+                  );
                 } else {
-                  // Show enrollment dialog
+                  // Show enrollment dialog for new users
                   showDialog(
                     context: context,
                     builder: (context) => LeadFormDialog(
                       courseId: course.id,
                       inquiryType: InquiryType.enrollment,
                     ),
-                  );
+                  ).then((_) => _checkEnrollmentStatus());
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -442,7 +597,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 ),
               ),
               child: Text(
-                isEnrolled ? 'Access Course' : 'Enroll Now',
+                isEnrolled
+                    ? (hasFullAccess ? 'Access Course' : 'Upgrade Now')
+                    : (course.hasFreeTrial ? 'Start Free Trial' : 'Enroll Now'),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
@@ -686,15 +843,20 @@ class _BottomActionBar extends StatelessWidget {
   final Course course;
   final Color courseColor;
   final Enrollment? enrollment;
+  final VoidCallback? onEnrollmentChanged;
 
   const _BottomActionBar({
     required this.course,
     required this.courseColor,
     this.enrollment,
+    this.onEnrollmentChanged,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isEnrolled = enrollment != null && enrollment!.status == EnrollmentStatus.active;
+    final hasFullAccess = enrollment?.hasFullAccess ?? false;
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.screenPadding,
@@ -713,50 +875,110 @@ class _BottomActionBar extends StatelessWidget {
       child: SafeArea(
         child: Row(
           children: [
-            // Request Info Button (Icon only)
-            SizedBox(
-              width: 52,
-              height: 52,
-              child: OutlinedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => LeadFormDialog(
-                      courseId: course.id,
-                      inquiryType: InquiryType.courseInquiry,
-                    ),
-                  );
-                },
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  foregroundColor: courseColor,
-                  side: BorderSide(color: courseColor.withValues(alpha: 0.5), width: 1.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: AppSpacing.borderRadiusSm,
-                  ),
+            // Price display (for non-enrolled users)
+            if (!isEnrolled) ...[
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (course.isFree || course.price == 0)
+                      Text(
+                        'FREE',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: AppColors.success,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      )
+                    else ...[
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            course.formattedEffectivePrice,
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          if (course.isOnSale) ...[
+                            const SizedBox(width: AppSpacing.xs),
+                            Text(
+                              course.formattedPrice,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.neutral500,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      if (course.hasFreeTrial)
+                        Text(
+                          '${course.freeTrialDays}-day free trial',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.success,
+                              ),
+                        ),
+                    ],
+                  ],
                 ),
-                child: const Icon(Icons.chat_bubble_outline_rounded, size: 22),
               ),
-            ),
+            ] else ...[
+              // Request Info Button (Icon only) - for enrolled users
+              SizedBox(
+                width: 52,
+                height: 52,
+                child: OutlinedButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => LeadFormDialog(
+                        courseId: course.id,
+                        inquiryType: InquiryType.courseInquiry,
+                      ),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    foregroundColor: courseColor,
+                    side: BorderSide(color: courseColor.withValues(alpha: 0.5), width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppSpacing.borderRadiusSm,
+                    ),
+                  ),
+                  child: const Icon(Icons.chat_bubble_outline_rounded, size: 22),
+                ),
+              ),
+            ],
             const SizedBox(width: AppSpacing.md),
-            // Enroll Now / Access Course Button (Full width)
+            // Main action button
             Expanded(
+              flex: isEnrolled ? 1 : 0,
               child: SizedBox(
+                width: isEnrolled ? null : 160,
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () {
-                    final isEnrolled = enrollment != null &&
-                        enrollment!.status == EnrollmentStatus.active;
-                    if (isEnrolled) {
+                    if (isEnrolled && hasFullAccess) {
                       context.push('/student/courses/${course.id}/content');
+                    } else if (isEnrolled && !hasFullAccess) {
+                      // Show payment sheet for upgrade
+                      PaymentSheet.show(
+                        context,
+                        course: course,
+                        enrollment: enrollment,
+                        onPaymentSuccess: onEnrollmentChanged,
+                        onTrialStarted: onEnrollmentChanged,
+                      );
                     } else {
+                      // Show enrollment dialog for new users
                       showDialog(
                         context: context,
                         builder: (context) => LeadFormDialog(
                           courseId: course.id,
                           inquiryType: InquiryType.enrollment,
                         ),
-                      );
+                      ).then((_) => onEnrollmentChanged?.call());
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -769,24 +991,26 @@ class _BottomActionBar extends StatelessWidget {
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        enrollment != null &&
-                                enrollment!.status == EnrollmentStatus.active
-                            ? Icons.play_circle_rounded
+                        isEnrolled
+                            ? (hasFullAccess ? Icons.play_circle_rounded : Icons.payment)
                             : Icons.school_rounded,
                         size: 20,
                       ),
                       const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        enrollment != null &&
-                                enrollment!.status == EnrollmentStatus.active
-                            ? 'Access Course'
-                            : 'Enroll Now',
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      Flexible(
+                        child: Text(
+                          isEnrolled
+                              ? (hasFullAccess ? 'Access Course' : 'Upgrade')
+                              : (course.hasFreeTrial ? 'Start Free Trial' : 'Enroll Now'),
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),

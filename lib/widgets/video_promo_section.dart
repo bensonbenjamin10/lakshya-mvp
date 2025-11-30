@@ -182,15 +182,16 @@ class _FeaturedVideoCard extends StatelessWidget {
 
                 // Content
                 Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       // Badge
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md,
-                          vertical: AppSpacing.xs,
+                          horizontal: AppSpacing.sm,
+                          vertical: 3,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.2),
@@ -202,15 +203,15 @@ class _FeaturedVideoCard extends StatelessWidget {
                             const Icon(
                               Icons.play_circle_outline_rounded,
                               color: Colors.white,
-                              size: 16,
+                              size: 14,
                             ),
-                            const SizedBox(width: AppSpacing.xs),
+                            const SizedBox(width: 4),
                             Text(
-                              'FEATURED VIDEO',
+                              'FEATURED',
                               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    letterSpacing: 1,
+                                    fontSize: 10,
                                   ),
                             ),
                           ],
@@ -219,33 +220,37 @@ class _FeaturedVideoCard extends StatelessWidget {
 
                       const Spacer(),
 
-                      // Title
+                      // Title - responsive size
                       Text(
                         video.title,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       if (video.subtitle != null) ...[
-                        const SizedBox(height: AppSpacing.xs),
+                        const SizedBox(height: 4),
                         Text(
                           video.subtitle!,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Colors.white.withValues(alpha: 0.9),
                               ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
 
-                      const SizedBox(height: AppSpacing.md),
+                      const SizedBox(height: AppSpacing.sm),
 
                       // Play Button & Duration
                       Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.lg,
-                              vertical: AppSpacing.sm,
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.xs,
                             ),
                             decoration: BoxDecoration(
                               color: Colors.white,
@@ -257,12 +262,12 @@ class _FeaturedVideoCard extends StatelessWidget {
                                 const Icon(
                                   Icons.play_arrow_rounded,
                                   color: AppColors.classicBlue,
-                                  size: 20,
+                                  size: 18,
                                 ),
-                                const SizedBox(width: AppSpacing.xs),
+                                const SizedBox(width: 4),
                                 Text(
-                                  'Watch Now',
-                                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                  'Watch',
+                                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
                                         color: AppColors.classicBlue,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -271,10 +276,10 @@ class _FeaturedVideoCard extends StatelessWidget {
                             ),
                           ),
                           if (video.duration != null) ...[
-                            const SizedBox(width: AppSpacing.md),
+                            const SizedBox(width: AppSpacing.sm),
                             Text(
                               video.duration!,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Colors.white.withValues(alpha: 0.8),
                                   ),
                             ),

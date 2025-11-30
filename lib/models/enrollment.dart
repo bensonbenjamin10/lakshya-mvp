@@ -13,6 +13,8 @@ class Enrollment extends BaseModel {
   final DateTime enrolledAt;
   final DateTime? completedAt;
   final DateTime? lastAccessedAt;
+  final DateTime? trialStartedAt;
+  final DateTime? trialEndsAt;
   final Course? course; // Populated when fetched with join
 
   Enrollment({
@@ -26,24 +28,77 @@ class Enrollment extends BaseModel {
     required this.enrolledAt,
     this.completedAt,
     this.lastAccessedAt,
+    this.trialStartedAt,
+    this.trialEndsAt,
     this.course,
   });
+  
+  /// Check if trial is currently active
+  bool get isTrialActive {
+    if (paymentStatus == PaymentStatus.paid || 
+        paymentStatus == PaymentStatus.notRequired) {
+      return false; // Not on trial - fully paid
+    }
+    if (trialEndsAt == null) return false;
+    return DateTime.now().isBefore(trialEndsAt!);
+  }
+  
+  /// Check if trial has expired
+  bool get isTrialExpired {
+    if (trialEndsAt == null) return false;
+    return DateTime.now().isAfter(trialEndsAt!);
+  }
+  
+  /// Get remaining trial days
+  int get trialDaysRemaining {
+    if (trialEndsAt == null) return 0;
+    final remaining = trialEndsAt!.difference(DateTime.now()).inDays;
+    return remaining > 0 ? remaining : 0;
+  }
+  
+  /// Check if user has full access (paid or active trial)
+  bool get hasFullAccess {
+    if (paymentStatus == PaymentStatus.paid || 
+        paymentStatus == PaymentStatus.notRequired) {
+      return true;
+    }
+    return isTrialActive;
+  }
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
+    final json = <String, dynamic>{
       'student_id': studentId,
       'course_id': courseId,
       'status': status.name,
-      if (paymentStatus != null) 'payment_status': paymentStatus!.name,
       'payment_required': paymentRequired,
       'progress_percentage': progressPercentage,
       'enrolled_at': enrolledAt.toIso8601String(),
-      if (completedAt != null) 'completed_at': completedAt!.toIso8601String(),
-      if (lastAccessedAt != null)
-        'last_accessed_at': lastAccessedAt!.toIso8601String(),
     };
+    
+    // Only include id if it's not empty (for updates)
+    if (id.isNotEmpty) {
+      json['id'] = id;
+    }
+    
+    // Include optional fields
+    if (paymentStatus != null) {
+      json['payment_status'] = paymentStatus!.dbValue;
+    }
+    if (completedAt != null) {
+      json['completed_at'] = completedAt!.toIso8601String();
+    }
+    if (lastAccessedAt != null) {
+      json['last_accessed_at'] = lastAccessedAt!.toIso8601String();
+    }
+    if (trialStartedAt != null) {
+      json['trial_started_at'] = trialStartedAt!.toIso8601String();
+    }
+    if (trialEndsAt != null) {
+      json['trial_ends_at'] = trialEndsAt!.toIso8601String();
+    }
+    
+    return json;
   }
 
   factory Enrollment.fromJson(Map<String, dynamic> json) {
@@ -74,6 +129,12 @@ class Enrollment extends BaseModel {
       lastAccessedAt: json['last_accessed_at'] != null
           ? DateTime.parse(json['last_accessed_at'] as String)
           : null,
+      trialStartedAt: json['trial_started_at'] != null
+          ? DateTime.parse(json['trial_started_at'] as String)
+          : null,
+      trialEndsAt: json['trial_ends_at'] != null
+          ? DateTime.parse(json['trial_ends_at'] as String)
+          : null,
       course: course,
     );
   }
@@ -89,6 +150,8 @@ class Enrollment extends BaseModel {
     DateTime? enrolledAt,
     DateTime? completedAt,
     DateTime? lastAccessedAt,
+    DateTime? trialStartedAt,
+    DateTime? trialEndsAt,
     Course? course,
   }) {
     return Enrollment(
@@ -102,6 +165,8 @@ class Enrollment extends BaseModel {
       enrolledAt: enrolledAt ?? this.enrolledAt,
       completedAt: completedAt ?? this.completedAt,
       lastAccessedAt: lastAccessedAt ?? this.lastAccessedAt,
+      trialStartedAt: trialStartedAt ?? this.trialStartedAt,
+      trialEndsAt: trialEndsAt ?? this.trialEndsAt,
       course: course ?? this.course,
     );
   }
@@ -164,6 +229,20 @@ extension PaymentStatusExtension on PaymentStatus {
         return 'Paid';
       case PaymentStatus.notRequired:
         return 'Not Required';
+    }
+  }
+  
+  /// Convert to database string value
+  String get dbValue {
+    switch (this) {
+      case PaymentStatus.pending:
+        return 'pending';
+      case PaymentStatus.partial:
+        return 'partial';
+      case PaymentStatus.paid:
+        return 'paid';
+      case PaymentStatus.notRequired:
+        return 'not_required';
     }
   }
 

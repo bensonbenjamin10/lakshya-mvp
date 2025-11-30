@@ -6,6 +6,7 @@ import 'package:lakshya_mvp/theme/theme.dart';
 import 'package:lakshya_mvp/widgets/lakshya_logo.dart';
 
 /// Splash Screen - Clean, Simple, Centered
+/// Shown on mobile after services are initialized
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -51,19 +52,22 @@ class _SplashScreenState extends State<SplashScreen>
     // Start animation
     _controller.forward();
 
-    // Navigate after delay - only on mobile or if explicitly on splash route
+    // Navigate after delay - only on mobile
     // On web, don't auto-redirect (allows direct navigation to /login, etc.)
     if (!kIsWeb) {
-      Future.delayed(const Duration(milliseconds: 3000), () {
-        if (mounted) {
-          // Only redirect if we're still on the splash route
-          final router = GoRouter.of(context);
-          final currentLocation = router.routerDelegate.currentConfiguration.uri.path;
-          if (currentLocation == '/splash') {
-            context.go('/');
-          }
-        }
-      });
+      _navigateToHome();
+    }
+  }
+
+  Future<void> _navigateToHome() async {
+    // Brief delay for branding visibility
+    await Future.delayed(const Duration(milliseconds: 2000));
+    if (mounted) {
+      final router = GoRouter.of(context);
+      final currentLocation = router.routerDelegate.currentConfiguration.uri.path;
+      if (currentLocation == '/splash') {
+        context.go('/');
+      }
     }
   }
 

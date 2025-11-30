@@ -25,9 +25,9 @@ class AppRouter {
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     // CRITICAL: On web, don't set initialLocation - GoRouter will read browser URL automatically
-    // On mobile, set to splash screen
+    // On mobile, start at home (splash is shown during initialization in main.dart)
     // When initialLocation is null/not set on web, GoRouter uses window.location.pathname
-    initialLocation: kIsWeb ? (Uri.base.path.isEmpty ? '/' : Uri.base.path) : '/splash',
+    initialLocation: kIsWeb ? (Uri.base.path.isEmpty ? '/' : Uri.base.path) : '/',
     observers: [
       if (AnalyticsService.observer != null) AnalyticsService.observer!,
     ],
@@ -35,15 +35,7 @@ class AppRouter {
       debugPrint('GoRouter exception: $exception');
       debugPrint('Failed route: ${state.uri}');
     },
-    redirect: (context, state) {
-      // On mobile only: redirect root to splash screen
-      // On web: respect browser URL (don't redirect, allow /login, /admin, etc.)
-      if (!kIsWeb && state.uri.path == '/') {
-        return '/splash';
-      }
-      // Allow all other routes to proceed normally
-      return null;
-    },
+    // No redirect needed - initialLocation handles starting at /splash on mobile
     routes: [
       // Splash Screen with fade transition
       GoRoute(
