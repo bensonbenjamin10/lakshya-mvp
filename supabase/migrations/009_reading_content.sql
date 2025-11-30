@@ -18,3 +18,4 @@ create index if not exists idx_course_modules_content_type
   on public.course_modules(content_type) 
   where content_type is not null;
 
+

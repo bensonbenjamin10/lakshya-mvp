@@ -3,24 +3,29 @@
 import { useState, useMemo } from 'react'
 import { useList, useNavigation, useDeleteMany } from '@refinedev/core'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { EmptyState } from '@/components/ui/empty-state'
 import { SearchInput } from '@/components/ui/search-input'
 import { exportToCSV, exportToExcel } from '@/lib/utils/export'
-import { Download, ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from 'lucide-react'
+import { Download, ArrowUpDown, ArrowUp, ArrowDown, Trash2, Copy, MoreVertical } from 'lucide-react'
 import { useToast } from '@/lib/hooks/use-toast'
+import { createClient } from '@/lib/supabase/client'
 
 type SortField = 'title' | 'category' | 'created_at' | null
 type SortOrder = 'asc' | 'desc'
 
 export function CoursesTable() {
   const toast = useToast()
+  const router = useRouter()
+  const supabase = createClient()
   const [searchQuery, setSearchQuery] = useState('')
   const [sortField, setSortField] = useState<SortField>('created_at')
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [duplicating, setDuplicating] = useState<string | null>(null)
   const { mutate: deleteMany } = useDeleteMany()
 
   const listResult = useList({
@@ -149,6 +154,108 @@ export function CoursesTable() {
       setSelectedIds(new Set())
     } else {
       setSelectedIds(new Set(courses.map((c) => c.id)))
+    }
+  }
+
+  // Duplicate course function
+  const handleDuplicateCourse = async (courseId: string) => {
+    setDuplicating(courseId)
+    try {
+      // Fetch the original course
+      const { data: course, error: courseError } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('id', courseId)
+        .single()
+
+      if (courseError) throw courseError
+
+      // Create new course with modified slug and title
+      const newSlug = `${course.slug}-copy-${Date.now()}`
+      const newCourse = {
+        ...course,
+        id: undefined,
+        slug: newSlug,
+        title: `${course.title} (Copy)`,
+        is_active: false, // New copies are inactive by default
+        created_at: undefined,
+        updated_at: undefined,
+      }
+
+      const { data: createdCourse, error: createError } = await supabase
+        .from('courses')
+        .insert(newCourse)
+        .select()
+        .single()
+
+      if (createError) throw createError
+
+      // Fetch and duplicate sections
+      const { data: sections, error: sectionsError } = await supabase
+        .from('course_sections')
+        .select('*')
+        .eq('course_id', courseId)
+        .order('display_order')
+
+      if (sectionsError) throw sectionsError
+
+      const sectionIdMap: Record<string, string> = {}
+
+      if (sections && sections.length > 0) {
+        for (const section of sections) {
+          const newSection = {
+            ...section,
+            id: undefined,
+            course_id: createdCourse.id,
+            created_at: undefined,
+            updated_at: undefined,
+          }
+
+          const { data: createdSection, error: sectionError } = await supabase
+            .from('course_sections')
+            .insert(newSection)
+            .select()
+            .single()
+
+          if (sectionError) throw sectionError
+          sectionIdMap[section.id] = createdSection.id
+        }
+      }
+
+      // Fetch and duplicate modules
+      const { data: modules, error: modulesError } = await supabase
+        .from('course_modules')
+        .select('*')
+        .eq('course_id', courseId)
+        .order('display_order')
+
+      if (modulesError) throw modulesError
+
+      if (modules && modules.length > 0) {
+        for (const module of modules) {
+          const newModule = {
+            ...module,
+            id: undefined,
+            course_id: createdCourse.id,
+            section_id: module.section_id ? sectionIdMap[module.section_id] : null,
+            created_at: undefined,
+            updated_at: undefined,
+          }
+
+          const { error: moduleError } = await supabase
+            .from('course_modules')
+            .insert(newModule)
+
+          if (moduleError) throw moduleError
+        }
+      }
+
+      toast.success('Course duplicated successfully')
+      router.push(`/courses/${createdCourse.id}`)
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to duplicate course')
+    } finally {
+      setDuplicating(null)
     }
   }
 
@@ -295,11 +402,22 @@ export function CoursesTable() {
                       : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <Link href={`/courses/${course.id}`}>
-                      <Button variant="ghost" size="sm">
-                        Edit
+                    <div className="flex items-center gap-1">
+                      <Link href={`/courses/${course.id}`}>
+                        <Button variant="ghost" size="sm">
+                          Edit
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDuplicateCourse(course.id)}
+                        disabled={duplicating === course.id}
+                        title="Duplicate course"
+                      >
+                        <Copy className="h-4 w-4" />
                       </Button>
-                    </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

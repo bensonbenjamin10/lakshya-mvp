@@ -330,3 +330,4 @@ export function PaymentAnalytics({ payments, courses }: PaymentAnalyticsProps) {
   )
 }
 
+

@@ -13,3 +13,4 @@ export default function PaymentDetailPage({ params }: { params: { id: string } }
   )
 }
 
+
