@@ -35,7 +35,7 @@ class CourseModuleRepository {
           .maybeSingle();
 
       if (response == null) return null;
-      return CourseModule.fromJson(response as Map<String, dynamic>);
+      return CourseModule.fromJson(response);
     } catch (e) {
       throw Exception('Failed to fetch course module: $e');
     }
@@ -50,7 +50,7 @@ class CourseModuleRepository {
           .select()
           .single();
 
-      return CourseModule.fromJson(response as Map<String, dynamic>);
+      return CourseModule.fromJson(response);
     } catch (e) {
       throw Exception('Failed to create course module: $e');
     }
@@ -66,7 +66,7 @@ class CourseModuleRepository {
           .select()
           .single();
 
-      return CourseModule.fromJson(response as Map<String, dynamic>);
+      return CourseModule.fromJson(response);
     } catch (e) {
       throw Exception('Failed to update course module: $e');
     }

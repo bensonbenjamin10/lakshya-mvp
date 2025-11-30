@@ -64,7 +64,7 @@ class EnrollmentRepository implements BaseRepository<Enrollment> {
           .eq('id', id)
           .single();
 
-      return Enrollment.fromJson(response as Map<String, dynamic>);
+      return Enrollment.fromJson(response);
     } catch (e) {
       if (e.toString().contains('PGRST116')) {
         return null; // Not found
@@ -90,7 +90,7 @@ class EnrollmentRepository implements BaseRepository<Enrollment> {
           .maybeSingle();
 
       if (response == null) return null;
-      return Enrollment.fromJson(response as Map<String, dynamic>);
+      return Enrollment.fromJson(response);
     } catch (e) {
       throw Exception('Failed to fetch enrollment: $e');
     }
@@ -125,7 +125,7 @@ class EnrollmentRepository implements BaseRepository<Enrollment> {
           ''')
           .single();
 
-      return Enrollment.fromJson(response as Map<String, dynamic>);
+      return Enrollment.fromJson(response);
     } catch (e) {
       throw Exception('Failed to create enrollment: $e');
     }
@@ -145,7 +145,7 @@ class EnrollmentRepository implements BaseRepository<Enrollment> {
           ''')
           .single();
 
-      return Enrollment.fromJson(response as Map<String, dynamic>);
+      return Enrollment.fromJson(response);
     } catch (e) {
       throw Exception('Failed to update enrollment: $e');
     }

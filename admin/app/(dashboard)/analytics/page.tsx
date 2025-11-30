@@ -5,17 +5,22 @@ import { AnalyticsDashboard } from '@/components/analytics/analytics-dashboard'
 export default async function AnalyticsPage() {
   const supabase = await createClient()
 
-  const [leadsData, coursesData, profilesData, activitiesData] = await Promise.all([
-    supabase.from('leads').select('*'),
-    supabase.from('courses').select('*'),
-    supabase.from('profiles').select('*').in('role', ['admin', 'faculty']),
-    supabase.from('lead_activities').select('*'),
-  ])
+  const [leadsData, coursesData, profilesData, activitiesData, paymentsData, enrollmentsData] =
+    await Promise.all([
+      supabase.from('leads').select('*'),
+      supabase.from('courses').select('*'),
+      supabase.from('profiles').select('*').in('role', ['admin', 'faculty']),
+      supabase.from('lead_activities').select('*'),
+      supabase.from('payments').select('*'),
+      supabase.from('enrollments').select('*'),
+    ])
 
   const leads = leadsData.data || []
   const courses = coursesData.data || []
   const profiles = profilesData.data || []
   const activities = activitiesData.data || []
+  const payments = paymentsData.data || []
+  const enrollments = enrollmentsData.data || []
 
   return (
     <div className="space-y-6">
@@ -29,6 +34,8 @@ export default async function AnalyticsPage() {
         courses={courses}
         profiles={profiles}
         activities={activities}
+        payments={payments}
+        enrollments={enrollments}
       />
     </div>
   )

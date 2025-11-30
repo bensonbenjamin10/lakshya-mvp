@@ -64,7 +64,7 @@ class StudentProgressRepository {
           .maybeSingle();
 
       if (response == null) return null;
-      return StudentProgress.fromJson(response as Map<String, dynamic>);
+      return StudentProgress.fromJson(response);
     } catch (e) {
       throw Exception('Failed to fetch module progress: $e');
     }
@@ -82,7 +82,7 @@ class StudentProgressRepository {
           ''')
           .single();
 
-      return StudentProgress.fromJson(response as Map<String, dynamic>);
+      return StudentProgress.fromJson(response);
     } catch (e) {
       throw Exception('Failed to save progress: $e');
     }

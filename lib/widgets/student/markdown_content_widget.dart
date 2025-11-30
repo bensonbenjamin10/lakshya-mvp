@@ -99,7 +99,9 @@ class _MarkdownContentWidgetState extends State<MarkdownContentWidget> {
                 padding: const EdgeInsets.all(AppSpacing.xl),
                 styleSheet: _buildMarkdownStyle(context),
                 onTapLink: (text, href, title) => _handleLink(href),
-                imageBuilder: (uri, title, alt) => _buildImage(uri),
+                // TODO: Upgrade flutter_markdown to use sizedImageBuilder when available
+                // ignore: deprecated_member_use
+                imageBuilder: (uri, title, alt) => _buildImage(uri, title, alt, null, null),
               ),
             ),
           ),
@@ -117,7 +119,7 @@ class _MarkdownContentWidgetState extends State<MarkdownContentWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Reading Progress',
                 style: TextStyle(
                   fontSize: 12,
@@ -214,7 +216,7 @@ class _MarkdownContentWidgetState extends State<MarkdownContentWidget> {
       ),
       
       // Code
-      code: TextStyle(
+      code: const TextStyle(
         fontFamily: 'monospace',
         backgroundColor: AppColors.neutral100,
         color: AppColors.vivaMagenta,
@@ -249,7 +251,7 @@ class _MarkdownContentWidgetState extends State<MarkdownContentWidget> {
       tableCellsPadding: const EdgeInsets.all(AppSpacing.sm),
       
       // Horizontal rule
-      horizontalRuleDecoration: BoxDecoration(
+      horizontalRuleDecoration: const BoxDecoration(
         border: Border(
           top: BorderSide(color: AppColors.neutral200, width: 1),
         ),
@@ -264,7 +266,7 @@ class _MarkdownContentWidgetState extends State<MarkdownContentWidget> {
     );
   }
 
-  Widget _buildImage(Uri uri) {
+  Widget _buildImage(Uri uri, String? title, String? alt, double? width, double? height) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: AppSpacing.md),
       decoration: BoxDecoration(
@@ -302,12 +304,12 @@ class _MarkdownContentWidgetState extends State<MarkdownContentWidget> {
             return Container(
               height: 120,
               color: AppColors.neutral100,
-              child: Center(
+              child: const Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.image_not_supported, color: AppColors.neutral400),
-                    const SizedBox(height: AppSpacing.xs),
+                    SizedBox(height: AppSpacing.xs),
                     Text(
                       'Image unavailable',
                       style: TextStyle(color: AppColors.neutral500, fontSize: 12),

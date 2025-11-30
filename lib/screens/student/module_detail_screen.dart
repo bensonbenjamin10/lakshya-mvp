@@ -123,11 +123,11 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(AppSpacing.xl),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.neutral100,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.search_off_rounded,
                 size: 48,
                 color: AppColors.neutral400,
@@ -189,7 +189,7 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
               color: AppColors.success.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.check_rounded,
               color: AppColors.success,
               size: 18,

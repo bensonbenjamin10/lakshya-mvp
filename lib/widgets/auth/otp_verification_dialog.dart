@@ -231,7 +231,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
+            content: const Row(
               children: [
                 Icon(Icons.check_circle, color: Colors.white, size: 20),
                 SizedBox(width: AppSpacing.sm),
@@ -314,7 +314,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog>
                         letterSpacing: -0.5,
                       ),
                     ),
-                    SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: AppSpacing.sm),
 
                     // Subtitle with phone number
                     _buildSubtitle(context),
@@ -325,7 +325,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog>
 
                     // Error message
                     if (_error != null) ...[
-                      SizedBox(height: AppSpacing.lg),
+                      const SizedBox(height: AppSpacing.lg),
                       _buildErrorMessage(context),
                     ],
 
@@ -334,12 +334,12 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog>
                     // Verify Button
                     _buildVerifyButton(),
 
-                    SizedBox(height: AppSpacing.lg),
+                    const SizedBox(height: AppSpacing.lg),
 
                     // Resend section
                     _buildResendSection(context),
 
-                    SizedBox(height: AppSpacing.md),
+                    const SizedBox(height: AppSpacing.md),
 
                     // Cancel link
                     _buildCancelButton(context),
@@ -358,7 +358,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog>
       width: size + AppSpacing.xxl,
       height: size + AppSpacing.xxl,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
@@ -408,9 +408,9 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog>
           ),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.xs),
         Container(
-          padding: EdgeInsets.symmetric(
+          padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
             vertical: AppSpacing.xs,
           ),
@@ -437,7 +437,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog>
         // Calculate optimal spacing based on available width
         final totalWidth = constraints.maxWidth;
         final totalBoxWidth = boxSize * 6;
-        final gapWidth = AppSpacing.md; // Gap between groups of 3
+        const gapWidth = AppSpacing.md; // Gap between groups of 3
         final availableSpacing = (totalWidth - totalBoxWidth - gapWidth) / 5;
         final spacing = availableSpacing.clamp(4.0, 10.0);
 
@@ -449,7 +449,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog>
             ...List.generate(3, (index) => _buildOtpBox(index, boxSize, fontSize, spacing)),
             
             // Center gap
-            SizedBox(width: gapWidth),
+            const SizedBox(width: gapWidth),
             
             // Last 3 digits
             ...List.generate(3, (index) => _buildOtpBox(index + 3, boxSize, fontSize, spacing)),
@@ -539,7 +539,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog>
   Widget _buildErrorMessage(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
       ),
@@ -551,12 +551,12 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.error_outline_rounded,
             size: 18,
             color: AppColors.error,
           ),
-          SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               _error!,
@@ -607,7 +607,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog>
             ),
           ),
           child: _isVerifying
-              ? SizedBox(
+              ? const SizedBox(
                   width: 24,
                   height: 24,
                   child: CircularProgressIndicator(
@@ -615,7 +615,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog>
                     color: AppColors.neutral500,
                   ),
                 )
-              : Text(
+              : const Text(
                   'Verify',
                   style: TextStyle(
                     fontSize: 16,
@@ -640,7 +640,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog>
         ),
         if (_resendCooldown > 0)
           Container(
-            padding: EdgeInsets.symmetric(
+            padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.sm,
               vertical: AppSpacing.xs,
             ),
@@ -663,7 +663,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog>
               onTap: _resendOtp,
               borderRadius: AppSpacing.borderRadiusXs,
               child: Padding(
-                padding: EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.sm,
                   vertical: AppSpacing.xs,
                 ),
@@ -689,7 +689,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog>
       },
       style: TextButton.styleFrom(
         foregroundColor: AppColors.neutral600,
-        padding: EdgeInsets.symmetric(
+        padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.sm,
         ),

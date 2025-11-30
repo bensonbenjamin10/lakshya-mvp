@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:lakshya_mvp/models/course_module.dart';
 import 'package:lakshya_mvp/models/student_progress.dart';
 import 'package:lakshya_mvp/theme/theme.dart';
@@ -103,11 +102,11 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     widget.onProgressUpdate(ProgressStatus.completed);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Row(
+        content: const Row(
           children: [
-            const Icon(Icons.check_circle, color: Colors.white, size: 20),
-            const SizedBox(width: AppSpacing.sm),
-            const Text('Video completed!'),
+            Icon(Icons.check_circle, color: Colors.white, size: 20),
+            SizedBox(width: AppSpacing.sm),
+            Text('Video completed!'),
           ],
         ),
         backgroundColor: AppColors.success,

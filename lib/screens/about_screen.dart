@@ -179,28 +179,28 @@ class AboutScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  _ProgramItem(
+                  const _ProgramItem(
                     icon: Icons.account_balance_rounded,
                     color: AppColors.classicBlue,
                     title: 'ACCA',
                     description: 'Association of Chartered Certified Accountants',
                     courseId: 'acca-001',
                   ),
-                  _ProgramItem(
+                  const _ProgramItem(
                     icon: Icons.balance_rounded,
                     color: AppColors.ultramarine,
                     title: 'CA',
                     description: 'Chartered Accountancy - Premier qualification',
                     courseId: 'ca-001',
                   ),
-                  _ProgramItem(
+                  const _ProgramItem(
                     icon: Icons.analytics_rounded,
                     color: AppColors.success,
                     title: 'CMA (US)',
                     description: 'Certified Management Accountant',
                     courseId: 'cma-001',
                   ),
-                  _ProgramItem(
+                  const _ProgramItem(
                     icon: Icons.business_center_rounded,
                     color: AppColors.mimosaGold,
                     title: 'B.Com & MBA',

@@ -66,11 +66,14 @@ export function ModuleForm({ moduleId }: ModuleFormProps) {
         .eq('id', moduleId)
         .single()
         .then(({ data }) => {
-          if (data?.content_body) {
-            setContentBody(data.content_body)
-          }
-          if (data?.content_type) {
-            setValue('content_type', data.content_type)
+          if (data && 'content_body' in data) {
+            const moduleData = data as { content_body?: string; content_type?: string }
+            if (moduleData.content_body) {
+              setContentBody(moduleData.content_body)
+            }
+            if (moduleData.content_type) {
+              setValue('content_type', moduleData.content_type)
+            }
           }
         })
     }
@@ -284,15 +287,32 @@ export function ModuleForm({ moduleId }: ModuleFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Unlock Date (optional)
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  {...register('is_free_preview')}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="ml-2 text-sm text-gray-700">Free Preview</span>
               </label>
-              <input
-                type="datetime-local"
-                {...register('unlock_date')}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-              />
+              <p className="text-xs text-gray-500 mt-1">
+                Allow non-enrolled students to preview this module
+              </p>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Unlock Date (optional)
+            </label>
+            <input
+              type="datetime-local"
+              {...register('unlock_date')}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Students can access this module only after this date
+            </p>
           </div>
 
           <div className="flex justify-end space-x-4">

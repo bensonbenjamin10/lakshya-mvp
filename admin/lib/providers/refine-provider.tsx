@@ -73,6 +73,22 @@ export function RefineProvider({ children }: { children: React.ReactNode }) {
             label: 'Analytics',
           },
         },
+        {
+          name: 'payments',
+          list: '/payments',
+          show: '/payments/:id',
+          meta: {
+            label: 'Payments',
+          },
+        },
+        {
+          name: 'profiles',
+          list: '/users',
+          show: '/users/:id',
+          meta: {
+            label: 'Users',
+          },
+        },
       ]}
     options={{
       syncWithLocation: true,
